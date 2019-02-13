@@ -53,7 +53,9 @@ class HomeButton extends Component {
 
     homeButtonOnPress() {
         // 跳转到开始番茄页面
-        this.props.navigation.navigate('TomatoTimer')
+        // this.props.navigation.navigate('TomatoTimer')
+        // 跳转到新建任务页面
+        this.props.navigation.navigate('NewTask')
     }
 
     render() {
@@ -72,8 +74,7 @@ class HomeButton extends Component {
                     {...this._panResponder.panHandlers}
                 >
                     <ButtonRadius
-                        onPress = {()=>{this.props.navigation.navigate('TomatoTimer')}}
-                        // onPress={this.homeButtonOnPress.bind(this)}
+                        onPress={this.homeButtonOnPress.bind(this)}
                         style={styles.button}
                         success
                         title="+"

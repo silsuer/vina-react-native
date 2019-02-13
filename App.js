@@ -12,7 +12,7 @@ import { StyleSheet, Text, View, Dimensions, DeviceEventEmitter, Animated, Easin
 import FooterView from './components/FooterView/FooterView';
 import { createStackNavigator, createAppContainer } from 'react-navigation'
 import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
-import HomeButton from './components/main/HomeButton/HomeButtom'
+import NewTask from './components/main/NewTask/NewTask'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -135,7 +135,7 @@ class App extends Component {
           </View>
           {/* body */}
           <View style={styles.body}>
-            <Text>body</Text>
+
           </View>
 
         </Animated.View>
@@ -162,6 +162,12 @@ const AppNavigator = createStackNavigator({
       header: null
     }
   },
+  NewTask: {
+    screen: NewTask,
+    navigationOptions: {
+      header: null
+    }
+  }
 })
 
 

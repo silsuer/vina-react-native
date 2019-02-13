@@ -118,7 +118,7 @@ export default class TimerCircularProgress extends Component {
       .arc(0, circleRadius * 2, circleRadius)
       .arc(0, -circleRadius * 2, circleRadius)
       .close();
-    let colors = ["#88A1FC", "#7869F1",];
+    let colors = this.props.status==="work" ? ['#FFA700','#CB3E3E'] : ["#88A1FC", "#7869F1",];
     let linearGradient = new ART.LinearGradient(colors, 0, 20, 90, 280);
 
     return <View style={{ backgroundColor: 'rgba(0,0,0,0.0)' }}>
@@ -269,7 +269,7 @@ export default class TimerCircularProgress extends Component {
       linePath.arc(-2 * radius, 0, radius)
       linePath.close()
       return (
-        <ART.Shape d={linePath} strokeWidth={0} fill={'#5a47d3'} />
+        <ART.Shape d={linePath} strokeWidth={0} fill={this.props.status==='work'? 'red' : '#5a47d3'} />
       )
     } else {
       const linePath = new ART.Path()
@@ -278,7 +278,7 @@ export default class TimerCircularProgress extends Component {
         .arc(0, -radius * 2, radius)
         .close();
       return (
-        <ART.Shape d={linePath} strokeWidth={0} fill={'#5a47d3'} />
+        <ART.Shape d={linePath} strokeWidth={0} fill={this.props.status==='work' ? 'red': '#5a47d3'} />
       )
     }
   }

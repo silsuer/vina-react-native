@@ -1,5 +1,5 @@
 import React, { Component } from 'React';
-import { Svg, Path, Defs, Style } from 'react-native-svg';
+import { Svg, Path } from 'react-native-svg';
 export default class TaskTimerStartSvg extends Component {
     render() {
         return (
