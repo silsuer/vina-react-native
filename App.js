@@ -165,8 +165,8 @@ const AppNavigator = createStackNavigator({
   NewTask: {
     screen: NewTask,
     navigationOptions: {
-      header: null
-    }
+      title:'新建任务'
+    },
   }
 })
 
