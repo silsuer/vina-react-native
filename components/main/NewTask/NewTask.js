@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { StyleSheet, ScrollView, View, Text, Dimensions, TextInput } from 'react-native'
-import { Button, List, InputItem, Stepper, DatePicker, Provider, Switch, Modal, SwipeAction, Picker } from '@ant-design/react-native'
-
+import { StyleSheet, ScrollView, View, Text, Dimensions, KeyboardAvoidingView } from 'react-native'
+import { Button, List, InputItem, Stepper, DatePicker, Provider, Switch, Modal, Toast, SwipeAction, Picker, TextareaItem } from '@ant-design/react-native'
+import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -23,6 +23,10 @@ const styles = StyleSheet.create({
     },
     headerText: {
         fontSize: 5,
+    },
+    taskComment: {
+        padding: 50,
+        marginTop: 0,
     }
 })
 
@@ -35,7 +39,18 @@ class NewTask extends Component {
             remindModeBell: false,  // 提醒方式: 响铃
             remindModeShock: false,  // 提醒方式: 震动
             remindModeNotice: false,  // 提醒方式: 通知
+            subTaskModeVisiable: false,  // 添加/修改子任务时显示的modal
+            title: '',        // 任务名
+            tomatoNumber: 1,  // 任务需要的番茄数
+            tmpSubTaskData: {      // 临时保存子任务的对象
+                title: '',
+                tomatoNumber: 0,
+            },
             repeatData: [['only']],  // 重复项数据
+            subTaskData: [{  // 子任务数据列表
+                title: '无',
+                tomatoNumber: 0,
+            }],
         }
 
         // 返回每个月的选择options
@@ -143,6 +158,33 @@ class NewTask extends Component {
         return stack.join(',')
     }
 
+    // 生成子任务视图
+    generateSubTaskRender() {
+        return this.state.subTaskData.map((data, index) => {
+            return (
+                <SwipeAction key={index}
+                    autoClose
+                    right={index === 0 ? [] : [
+                        {
+                            text: '移除',
+                            onPress: this.deleteRepeatItem.bind(this, index),
+                            style: { backgroundColor: 'red', color: 'white' },
+                        },
+                    ]}
+                    left={[
+                        {
+                            text: '新建',
+                            onPress: this.addSubTaskItem.bind(this, index),
+                            style: { backgroundColor: 'orange', color: 'white' },
+                        },
+                    ]}
+                >
+                    <List.Item extra={<TomatoSvg number={data.tomatoNumber} width="25" height="25"></TomatoSvg>} >{data.title}</List.Item>
+                </SwipeAction>
+            )
+        })
+    }
+
     // 生成重复项的部分
     generateRepeatRender() {
 
@@ -179,12 +221,18 @@ class NewTask extends Component {
 
     }
 
+    // 添加一个子任务
+    addSubTaskItem(index) {
+        // 弹出一个任务框modal，记录子任务的名称和番茄数
+        // 弹出窗口时要先清空临时任务对象
+        this.setState({ subTaskModeVisiable: true, tmpSubTaskData: { title: '', tomatoNumber: 0 } })
+    }
+
     // 移除重复项
     deleteRepeatItem(index) {
         if (index === 0) return
         let data = this.state.repeatData
         data.splice(index, 1)
-        console.log(data)
         this.setState({ repeatData: data })
     }
 
@@ -206,69 +254,171 @@ class NewTask extends Component {
 
     }
 
+    // 保存子任务
+    saveSubTask() {
+        // 判断是否存在title
+        if (this.state.tmpSubTaskData.title === '') {
+            Toast.fail('任务名不能为空', 1)
+            return
+        }
+        // 计算现在的总番茄数
+        let totalTomatoNumber = this.state.tmpSubTaskData.tomatoNumber
+        for (let i = 0; i < this.state.subTaskData.length; i++) {
+            totalTomatoNumber += this.state.subTaskData[i].tomatoNumber
+        }
+
+
+        console.log(totalTomatoNumber)
+
+        // 番茄总数过大，则重设父任务的番茄总数
+        if (totalTomatoNumber > this.state.tomatoNumber) {
+            this.setState({ tomatoNumber: totalTomatoNumber }, () => {
+                Toast.info('子任务番茄总数超过父任务！已重新调整父任务番茄数', 1)
+            })
+        }
+        // 传入当前子任务数组中
+        // 如果当前子任务第一个是空的话，则改为修改
+        let data = this.state.subTaskData
+        if (this.state.subTaskData.length == 1 && this.state.subTaskData[0].title === "无" && this.state.subTaskData[0].tomatoNumber === 0) {
+            data = [this.state.tmpSubTaskData]
+        } else {  // 有效子任务，放入子任务列表尾部
+            data.push(this.state.tmpSubTaskData)
+        }
+        // 清空临时子任务数组
+        this.clearTmpSubTaskData()
+        // 关闭模态框
+        this.setState({ subTaskModeVisiable: false, subTaskData: data })
+    }
+    // 修改临时子任务title
+    changeTmpSubTaskTitle(value) {
+        let data = this.state.tmpSubTaskData
+        data.title = value
+        this.setState({ tmpSubTaskData: data })
+    }
+
+    // 修改临时子任务番茄数
+    changeTmpSubTaskTomatoNumber(value) {
+        let data = this.state.tmpSubTaskData
+        data.tomatoNumber = value
+        this.setState({ tmpSubTaskData: data })
+    }
+
+    // 取消创建任务模态框
+    cancelCreateSubTaskModal() {
+        // 关闭模态框
+        this.setState({ subTaskModeVisiable: false })
+        // 清空子任务数据
+        this.clearTmpSubTaskData();
+    }
+
+    // 清除临时子任务数据
+    clearTmpSubTaskData() {
+        this.setState({ tmpSubTaskData: { title: '', tomatoNumber: 0 } })
+    }
+
+    // 修改主任务番茄数
+    changeTaskTomatoNumber(value) {
+        this.setState({ tomatoNumber: value })
+    }
     render() {
-
-
-
-
-
-
         return (
             <Provider>
-                <ScrollView >
-                    <View style={styles.container}>
-                        <View style={styles.header}>
+                <KeyboardAvoidingView behavior="padding" enabled>
+                    <ScrollView >
+                        <View style={styles.container}>
+                            <View style={styles.header}>
 
-                        </View>
-                        <List renderHeader='基本'>
-                            <InputItem textAlign="right" placeholder="必填">
-                                任务名
+                            </View>
+                            <List renderHeader='基本'>
+                                <InputItem textAlign="right" placeholder="必填">
+                                    任务名
                    </InputItem>
-                            <List.Item
-                                extra={
-                                    <Stepper key="2" min={1} defaultValue={3} readOnly={false} />
-                                }
-                            >
-                                番茄数
+                                <List.Item
+                                    extra={
+                                        <Stepper key="2" min={1} onChange={this.changeTaskTomatoNumber.bind(this)} value={this.state.tomatoNumber} readOnly={false} />
+                                    }
+                                >
+                                    番茄数
                    </List.Item>
 
-                            <DatePicker mode="time">
-                                <List.Item arrow="horizontal">提醒时间</List.Item>
-                            </DatePicker>
-                            <List.Item
-                                extra={this.getRemindModesString(this)}
-                                arrow="horizontal"
-                                onPress={this.clickRemindMode.bind(this)}>
-                                提醒方式
+                                <DatePicker mode="time">
+                                    <List.Item arrow="horizontal">提醒时间</List.Item>
+                                </DatePicker>
+                                <List.Item
+                                    extra={this.getRemindModesString(this)}
+                                    arrow="horizontal"
+                                    onPress={this.clickRemindMode.bind(this)}>
+                                    提醒方式
                             </List.Item>
-                            {this.generateRepeatRender()}
-                        </List>
+                                {this.generateRepeatRender()}
+                            </List>
+
+                            <List renderHeader="子任务">
+                                {this.generateSubTaskRender()}
+
+                            </List>
 
 
-                        <Button
-                            type="primary"
-                            style={{ marginTop: 30 }}
-                        >保存</Button>
+                            <List renderHeader="备注">
+                                <TextareaItem
+                                    rows={8}
+                                    style={styles.taskComment}
+                                >
 
-                    </View>
+                                </TextareaItem>
+                            </List>
 
-                    {/* 提醒方式模态框 */}
-                    <Modal
-                        popup
-                        visible={this.state.remindModeVisiable}
-                        closable
-                        maskClosable
-                        animationType="slide-up"
-                    >
-                        <List renderHeader="提醒方式">
-                            <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'bell')} checked={this.state.remindModeBell} />}>响铃</List.Item>
-                            <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'shock')} checked={this.state.remindModeShock} />}>震动</List.Item>
-                            <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'notice')} checked={this.state.remindModeNotice} />}>通知</List.Item>
-                            <List.Item> <Button onPress={this.closeRemindModeModal.bind(this)} type="primary">关闭</Button> </List.Item>
-                        </List>
-                    </Modal>
 
-                </ScrollView>
+                            <Button
+                                type="primary"
+                                style={{ marginTop: 30 }}
+                            >保存</Button>
+
+                        </View>
+
+                        {/* 提醒方式模态框 */}
+                        <Modal
+                            popup
+                            visible={this.state.remindModeVisiable}
+                            closable
+                            maskClosable
+                            animationType="slide-up"
+                        >
+                            <List renderHeader="提醒方式">
+                                <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'bell')} checked={this.state.remindModeBell} />}>响铃</List.Item>
+                                <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'shock')} checked={this.state.remindModeShock} />}>震动</List.Item>
+                                <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'notice')} checked={this.state.remindModeNotice} />}>通知</List.Item>
+                                <List.Item> <Button onPress={this.closeRemindModeModal.bind(this)} type="primary">关闭</Button> </List.Item>
+                            </List>
+                        </Modal>
+
+                        <Modal
+                            title="新建子任务"
+                            transparent
+                            maskClosable
+                            visible={this.state.subTaskModeVisiable}
+                            footer={[
+                                { text: '取消', onPress: this.cancelCreateSubTaskModal.bind(this) },
+                                { text: '保存', onPress: this.saveSubTask.bind(this) },
+                            ]}
+                        >
+                            <List style={{ marginTop: 10 }}>
+                                <InputItem textAlign="right" placeholder="必填" onChange={this.changeTmpSubTaskTitle.bind(this)} value={this.state.tmpSubTaskData.title}>
+                                    任务名
+                                </InputItem>
+                                <List.Item
+                                    extra={
+                                        <Stepper key="2" min={0} onChange={this.changeTmpSubTaskTomatoNumber.bind(this)} value={this.state.tmpSubTaskData.tomatoNumber} readOnly={false} />
+                                    }
+                                >
+                                    番茄数
+                              </List.Item>
+                            </List>
+                        </Modal>
+
+
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </Provider>
 
 
