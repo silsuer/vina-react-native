@@ -193,7 +193,7 @@ class NewTask extends Component {
                 return [
                     {
                         text: '移除',
-                        onPress: this.deleteRepeatItem.bind(this, index),
+                        onPress: this.deleteSubTaskItem.bind(this, index),
                         style: { backgroundColor: 'red', color: 'white' },
                     },
                     edit
@@ -219,6 +219,12 @@ class NewTask extends Component {
         })
     }
 
+    // 删除子任务
+    deleteSubTaskItem(index) {
+        let data = this.state.subTaskData
+        data.splice(index, 1)
+        this.setState({ subTaskData: data })
+    }
     // 生成重复项的部分
     generateRepeatRender() {
 
