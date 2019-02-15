@@ -42,15 +42,22 @@ class NewTask extends Component {
             subTaskModeVisiable: false,  // 添加/修改子任务时显示的modal
             title: '',        // 任务名
             tomatoNumber: 1,  // 任务需要的番茄数
+            remindTime: {    // 提醒时间，默认都是-1，没有时间限制
+                hour: -1,
+                minute: -1,
+            },
+            nowSelectRemindTime: null,
             tmpSubTaskData: {      // 临时保存子任务的对象
                 title: '',
                 tomatoNumber: 0,
+                tmpIndex: -1,     // 如果是-1，则是新建子任务，如果 >-1 则是修改子任务，index对应数据索引
             },
             repeatData: [['only']],  // 重复项数据
             subTaskData: [{  // 子任务数据列表
                 title: '无',
                 tomatoNumber: 0,
             }],
+            taskComment: '',  // 备注
         }
 
         // 返回每个月的选择options
@@ -128,6 +135,23 @@ class NewTask extends Component {
         this.setState({ remindModeVisiable: false })
     }
 
+    // 获取提醒时间的字符串
+    getRemindTimeString() {
+        // if (this.state.remindTime.hour >= 0 && this.state.remindTime.minute >= 0) {
+        //     return this.state.remindTime.time.toLocaleTimeString()
+        // }
+        return '无dfddd'
+    }
+
+    // 清空提醒时间
+    clearRemindTime() {
+        this.setState({ remindTime: { hour: -1, minute: -1 }, nowSelectRemindTime: null })
+    }
+    // 更改提醒时间
+    changeRemindTime(date) {
+        console.log(date.getHours())
+        this.setState({ remindTime: { hour: date.getHours(), minute: date.getMinutes() }, nowSelectRemindTime: date })
+    }
     // 更改提醒方式
     changeRemindModeStatus(type) {
         switch (type) {
@@ -160,17 +184,30 @@ class NewTask extends Component {
 
     // 生成子任务视图
     generateSubTaskRender() {
+        const rightOptions = (index) => {
+            let edit = {
+                text: '编辑',
+                onPress: this.editRepeatItem.bind(this, index),
+                style: { backgroundColor: '#3d8ee2', color: 'white' },
+            }
+            if (index === 0) {
+                return [edit]
+            } else {
+                return [
+                    {
+                        text: '移除',
+                        onPress: this.deleteRepeatItem.bind(this, index),
+                        style: { backgroundColor: 'red', color: 'white' },
+                    },
+                    edit
+                ]
+            }
+        }
         return this.state.subTaskData.map((data, index) => {
             return (
                 <SwipeAction key={index}
                     autoClose
-                    right={index === 0 ? [] : [
-                        {
-                            text: '移除',
-                            onPress: this.deleteRepeatItem.bind(this, index),
-                            style: { backgroundColor: 'red', color: 'white' },
-                        },
-                    ]}
+                    right={rightOptions(index)}
                     left={[
                         {
                             text: '新建',
@@ -225,7 +262,14 @@ class NewTask extends Component {
     addSubTaskItem(index) {
         // 弹出一个任务框modal，记录子任务的名称和番茄数
         // 弹出窗口时要先清空临时任务对象
-        this.setState({ subTaskModeVisiable: true, tmpSubTaskData: { title: '', tomatoNumber: 0 } })
+        this.setState({ subTaskModeVisiable: true, tmpSubTaskData: { title: '', tomatoNumber: 0, tmpIndex: -1 } })
+    }
+
+    // 编辑重复项
+    editRepeatItem(index) {
+        currentItem = this.state.subTaskData[index]
+        currentItem.tmpIndex = index
+        this.setState({ tmpSubTaskData: currentItem, subTaskModeVisiable: true })
     }
 
     // 移除重复项
@@ -261,29 +305,34 @@ class NewTask extends Component {
             Toast.fail('任务名不能为空', 1)
             return
         }
-        // 计算现在的总番茄数
+
         let totalTomatoNumber = this.state.tmpSubTaskData.tomatoNumber
+        // 判断是修改还是增加
+        // 计算现在的总番茄数
         for (let i = 0; i < this.state.subTaskData.length; i++) {
+            if (i === this.state.tmpSubTaskData.tmpIndex) continue  // 如果索引相等，则不计入番茄总数
             totalTomatoNumber += this.state.subTaskData[i].tomatoNumber
         }
-
-
-        console.log(totalTomatoNumber)
-
         // 番茄总数过大，则重设父任务的番茄总数
         if (totalTomatoNumber > this.state.tomatoNumber) {
             this.setState({ tomatoNumber: totalTomatoNumber }, () => {
                 Toast.info('子任务番茄总数超过父任务！已重新调整父任务番茄数', 1)
             })
         }
-        // 传入当前子任务数组中
-        // 如果当前子任务第一个是空的话，则改为修改
         let data = this.state.subTaskData
-        if (this.state.subTaskData.length == 1 && this.state.subTaskData[0].title === "无" && this.state.subTaskData[0].tomatoNumber === 0) {
-            data = [this.state.tmpSubTaskData]
-        } else {  // 有效子任务，放入子任务列表尾部
-            data.push(this.state.tmpSubTaskData)
+        if (this.state.tmpSubTaskData.tmpIndex === -1) {  // 如果是保存
+            // 传入当前子任务数组中
+            // 如果当前子任务第一个是空的话，则改为修改
+            if (this.state.subTaskData.length == 1 && this.state.subTaskData[0].title === "无" && this.state.subTaskData[0].tomatoNumber === 0) {
+                data = [this.state.tmpSubTaskData]
+            } else {  // 有效子任务，放入子任务列表尾部
+                data.push(this.state.tmpSubTaskData)
+            }
+        } else {
+            // 修改
+            data[this.state.tmpSubTaskData.tmpIndex] = { title: this.state.tmpSubTaskData.title, tomatoNumber: this.state.tmpSubTaskData.tomatoNumber }
         }
+
         // 清空临时子任务数组
         this.clearTmpSubTaskData()
         // 关闭模态框
@@ -320,6 +369,16 @@ class NewTask extends Component {
     changeTaskTomatoNumber(value) {
         this.setState({ tomatoNumber: value })
     }
+
+    // 点击保存后将任务保存到数据库
+    saveTask() {
+        console.log(this.state)
+        // 验证必填项
+        // 过滤无效项
+        // 生成任务对象
+        // 触发保存事件
+    }
+
     render() {
         return (
             <Provider>
@@ -341,15 +400,38 @@ class NewTask extends Component {
                                     番茄数
                    </List.Item>
 
-                                <DatePicker mode="time">
-                                    <List.Item arrow="horizontal">提醒时间</List.Item>
-                                </DatePicker>
+
+                                <SwipeAction
+                                    autoClose
+                                    right={[
+                                        {
+                                            text: '清空',
+                                            onPress: this.clearRemindTime.bind(this),
+                                            style: { backgroundColor: 'red', color: 'white' },
+                                        },
+                                    ]}
+                                >
+                                    <DatePicker
+                                        title="提醒时间"
+                                        mode="time"
+                                        value={this.state.nowSelectRemindTime}
+                                        extra={(this.state.remindTime.hour === -1 && this.state.remindTime.minute === -1) ? '无' : (this.getRemindTimeString.bind(this))}
+                                        onChange={this.changeRemindTime.bind(this)}
+                                    >
+                                        <List.Item arrow="horizontal">提醒时间</List.Item>
+                                    </DatePicker>
+                                </SwipeAction>
+
+
                                 <List.Item
                                     extra={this.getRemindModesString(this)}
                                     arrow="horizontal"
                                     onPress={this.clickRemindMode.bind(this)}>
                                     提醒方式
                             </List.Item>
+                            </List>
+
+                            <List renderHeader="重复">
                                 {this.generateRepeatRender()}
                             </List>
 
@@ -363,8 +445,9 @@ class NewTask extends Component {
                                 <TextareaItem
                                     rows={8}
                                     style={styles.taskComment}
+                                    onChange={(value) => { this.setState({ taskComment: value }) }}
                                 >
-
+                                    {this.state.taskComment}
                                 </TextareaItem>
                             </List>
 
@@ -372,6 +455,7 @@ class NewTask extends Component {
                             <Button
                                 type="primary"
                                 style={{ marginTop: 30 }}
+                                onPress={this.saveTask.bind(this)}
                             >保存</Button>
 
                         </View>
