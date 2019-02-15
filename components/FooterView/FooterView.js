@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Image, Animated, Easing, DeviceEventEmitter } from 'react-native';
+import { Dimensions, View, StyleSheet, Image, Animated, Easing, DeviceEventEmitter } from 'react-native';
 import HomeButton from '../main/HomeButton/HomeButtom'
 
-
+import BottomTabBar from '../common/TabBar/BottomTabBar'
+const mainWindow = Dimensions.get('window')
+const windowWidth = mainWindow.width
+const windowHeight = mainWindow.height
 
 export default class FooterView extends Component {
 
@@ -69,25 +72,29 @@ export default class FooterView extends Component {
             container: {
                 // flex:5,
                 bottom: 50,
+                width: windowWidth,
+                justifyContent: 'center',
+                alignItems: 'center',
             },
             homeButton: {
                 position: 'absolute',
             },
-            earthImage: {
-                position: 'absolute',
-                left: -100,
-                // bottom: this.state.bgImageBottom,
-            }
         })
         return (
             <View style={styles.container}>
                 {/* 拖拽home会出现的背景图片 */}
                 <Animated.View style={{
                     position: 'absolute',
-                    left: -100,
                     bottom: this.state.bgImageBottom
                 }}>
-                    <Image style={{ width: 250, height: 150 }} source={require('../assets/images/earth_bg.png')} />
+                    <Image style={{ width: 250, height: 150,marginBottom:10 }} source={require('../assets/images/earth_bg.png')} />
+                </Animated.View>
+                <Animated.View style={{
+                    position: 'absolute',
+                    bottom: this.state.bgImageBottom
+                }}>
+                    {/* 导航栏 */}
+                    <BottomTabBar />
                 </Animated.View>
                 {/* 浮动一个圆形button */}
                 <HomeButton style={styles.homeButton} />

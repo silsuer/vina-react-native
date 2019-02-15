@@ -10,9 +10,10 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Dimensions, DeviceEventEmitter, Animated, Easing } from 'react-native';
 import FooterView from './components/FooterView/FooterView';
-import { createStackNavigator, createAppContainer } from 'react-navigation'
+import { createStackNavigator, createAppContainer, createBottomTabNavigator } from 'react-navigation'
 import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
 import NewTask from './components/main/NewTask/NewTask'
+import Index from './components/main/Index/Index'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -29,6 +30,7 @@ class App extends Component {
     this.state = {
       currentViewHeight: new Animated.Value(windowHeight),
       currentViewWidth: new Animated.Value(windowWidth),
+      currentPageView: 'home',
     }
 
     this.narrowCurrentViewHeight = Animated.timing(
@@ -79,13 +81,35 @@ class App extends Component {
       this.reductionCurrentViewHeight.start()
       this.reductionCurrentViewWidth.start()
     })
+
+    this.bottomTabBarClickListener = DeviceEventEmitter.addListener("bottomTabBarClick", (type) => {
+      // 得到类型，更改当前页面的视图
+      this.setState({ currentPageView: type })
+      // 广播页面还原事件
+      this.reductionCurrentViewHeight.start()
+      this.reductionCurrentViewWidth.start()
+      DeviceEventEmitter.emit("moveDownFooterView")
+    })
   }
 
   // 组件销毁时移除事件
   componentWillUnmount() {
     this.narrowCurrentViewListener.remove()
+    this.reductionCurrentViewListener.remove()
+    this.bottomTabBarClickListener.remove()
   }
 
+  // 获取当前页面的视图
+  getCurrentPageView() {
+    switch (this.state.currentPageView) {
+      case 'home':
+        return (<Index />)
+      case 'tasks':
+        return (<NewTask />)
+      default:
+        return (<Index />)
+    }
+  }
 
   render() {
 
@@ -112,6 +136,9 @@ class App extends Component {
     });
 
 
+    const getCurrentPageView = () => {
+
+    }
 
     return (
       <View style={styles.container}>
@@ -129,14 +156,7 @@ class App extends Component {
           height: this.state.currentViewHeight,
           borderRadius: 15
         }}>
-          {/* header */}
-          <View style={styles.header}>
-            {/* <Text>title</Text> */}
-          </View>
-          {/* body */}
-          <View style={styles.body}>
-
-          </View>
+          {this.getCurrentPageView()}
 
         </Animated.View>
         {/* footer */}
@@ -165,8 +185,15 @@ const AppNavigator = createStackNavigator({
   NewTask: {
     screen: NewTask,
     navigationOptions: {
-      title:'新建任务'
+      title: '新建任务'
     },
+  },
+  Index: {
+    screen: Index,
+    navigationOptions: {
+      // title: '首页'
+      header: null
+    }
   }
 })
 

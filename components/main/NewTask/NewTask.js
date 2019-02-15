@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, ScrollView, View, Text, Dimensions, KeyboardAvoidingView } from 'react-native'
 import { Button, List, InputItem, Stepper, DatePicker, Provider, Switch, Modal, Toast, SwipeAction, Picker, TextareaItem } from '@ant-design/react-native'
 import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
+import Header from '../../common/Header/Header'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -13,7 +14,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         display: 'flex',
         flex: 1,
-        // justifyContent: 'center',
     },
     inputItem: {
         backgroundColor: '#f5f5f5',
@@ -137,10 +137,7 @@ class NewTask extends Component {
 
     // 获取提醒时间的字符串
     getRemindTimeString() {
-        // if (this.state.remindTime.hour >= 0 && this.state.remindTime.minute >= 0) {
-        //     return this.state.remindTime.time.toLocaleTimeString()
-        // }
-        return '无dfddd'
+        return '无'
     }
 
     // 清空提醒时间
@@ -386,7 +383,7 @@ class NewTask extends Component {
                     <ScrollView >
                         <View style={styles.container}>
                             <View style={styles.header}>
-
+                                <Header title="新建" />
                             </View>
                             <List renderHeader='基本'>
                                 <InputItem textAlign="right" placeholder="必填">

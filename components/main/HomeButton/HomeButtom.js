@@ -56,6 +56,8 @@ class HomeButton extends Component {
         // this.props.navigation.navigate('TomatoTimer')
         // 跳转到新建任务页面
         this.props.navigation.navigate('NewTask')
+        // 跳转到首页
+        // this.props.navigation.navigate('Index')
     }
 
     render() {
