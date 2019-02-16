@@ -9,8 +9,8 @@ const windowHeight = mainWindow.height
 
 const styles = StyleSheet.create({
     container: {
-        width: windowWidth,
-        height: windowHeight,
+        // width: windowWidth,
+        // height: windowHeight,
         backgroundColor: '#f5f5f5',
         display: 'flex',
         flex: 1,

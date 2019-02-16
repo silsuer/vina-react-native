@@ -1,9 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, DeviceEventEmitter } from 'react-native'
-import IndexSvg from '../../assets/svgs/IndexSvg/IndexSvg'
-import TaskTabBarSvg from '../../assets/svgs/TaskTabBarSvg/TaskTabBarSvg'
-import StatisticsBarSvg from '../../assets/svgs/StatisticsBarSvg/StatisticsBarSvg'
-import MineBarSvg from '../../assets/svgs/MineBarSvg/MineBarSvg'
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, DeviceEventEmitter, Animated, Easing } from 'react-native'
 
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
@@ -11,86 +7,206 @@ const windowHeight = mainWindow.height
 
 
 
+const configWidth = 50
+const initWidth = 1
 // 下方的导航栏
 class BottomTabBar extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            visiable: {
-                home: false,  // 首页
-                tasks: false,  // 任务
-                statistics: false,  // 统计
-                mine: false,    // 我的
-            }
+            perWidth: new Animated.Value(initWidth),  // 每一个icon的宽度
+            containerWidth: new Animated.Value(initWidth),
+            leftFillViewWidth: new Animated.Value(initWidth),
+            rightFillViewWidth: new Animated.Value(initWidth),
+            status: 'close'  // open 导航处于打开状态 close 关闭
         }
+
+        this.perWidthAnimatedOpen = Animated.timing(
+            this.state.perWidth,
+            {
+                toValue: configWidth,
+                duration: 150,
+                easing: Easing.linear
+            }
+        )
+
+
+        this.containerWidthAnimatedOpen = Animated.timing(
+            this.state.containerWidth,
+            {
+                toValue: (this.props.options.length + 1) * configWidth,
+                duration: 100,
+                easing: Easing.linear
+            }
+        )
+
+        this.leftFillViewWidthAnimatedOpen = Animated.timing(
+            this.state.leftFillViewWidth,
+            {
+                toValue: configWidth / 2,
+                duration: 150,
+                easing: Easing.linear
+            }
+        )
+
+        this.rightFillViewWidthAnimatedOpen = Animated.timing(
+            this.state.rightFillViewWidth,
+            {
+                toValue: configWidth * 0.7,
+                duration: 150,
+                easing: Easing.linear
+            }
+        )
+
+        this.perWidthAnimatedClose = Animated.timing(
+            this.state.perWidth,
+            {
+                toValue: initWidth,
+                duration: 150,
+                easing: Easing.linear
+            }
+        )
+
+
+        this.containerWidthAnimatedClose = Animated.timing(
+            this.state.containerWidth,
+            {
+                toValue: initWidth,
+                duration: 100,
+                easing: Easing.linear
+            }
+        )
+
+        this.leftFillViewWidthAnimatedClose = Animated.timing(
+            this.state.leftFillViewWidth,
+            {
+                toValue: initWidth,
+                duration: 150,
+                easing: Easing.linear
+            }
+        )
+
+        this.rightFillViewWidthAnimatedClose = Animated.timing(
+            this.state.rightFillViewWidth,
+            {
+                toValue: initWidth,
+                duration: 150,
+                easing: Easing.linear
+            }
+        )
+
     }
 
-    // 点击事件
-    buttonOnPress(type) {
-        // 将这个button设置为选中状态，取消其他button的选中状态
-
-        let data = this.state.visiable
-        for (let n in data) {
-            if (n === type) {
-                data[n] = true
+    componentDidMount() {
+        // 触发导航栏
+        this.clickHomeButtonListener = DeviceEventEmitter.addListener("clickHomeButton", () => {
+            if (this.state.status === 'open') {
+                this.closeTabBar()
             } else {
-                data[n] = false
+                this.openTabBar()
             }
-        }
-        this.setState({ visiable: data })
-        // 广播点击事件
-        DeviceEventEmitter.emit("bottomTabBarClick", type)
+        })
+        this.closeTabBarListener = DeviceEventEmitter.addListener("closeTabBar", () => {
+            if (this.state.status === 'open') {
+                this.closeTabBar()
+            }
+        })
+        this.openTabBarListener = DeviceEventEmitter.addListener("openTabBar", () => {
+            if (this.state.status === 'close') {
+                this.openTabBar()
+            }
+        })
     }
 
+    componentWillUnmount() {
+        this.clickHomeButtonListener.remove()
+        this.openTabBarListener.remove()
+        this.closeTabBarListener.remove()
+    }
 
-    render() {
-        let styles = StyleSheet.create({
-            container: {
-                display: 'flex',
-                flexDirection: 'row',
-                width: windowWidth,
-                justifyContent: 'space-evenly',
-                alignItems: 'center',
-                backgroundColor: 'rgba(245,245,245,0.9)',
-                height: 70,
-                marginBottom: 5,
-            },
-            tab: {
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: windowWidth / 4,
-                borderRightWidth: 1,
-                borderRightColor: 'rgba(200,200,200,0.5)'
-            }
+    // 打开导航栏
+    openTabBar() {
+        this.containerWidthAnimatedOpen.start(() => {
+            this.perWidthAnimatedOpen.start()
+            this.rightFillViewWidthAnimatedOpen.start()
+        })
+        this.setState({ status: 'open' })
+    }
+    // 关闭导航栏
+    closeTabBar() {
+        console.log("关闭")
+        this.perWidthAnimatedClose.start()
+        this.leftFillViewWidthAnimatedClose.start()
+        this.rightFillViewWidthAnimatedClose.start(() => {
+            this.containerWidthAnimatedClose.start()
+            this.setState({ status: 'close' })
         })
 
 
+    }
+    // 点击事件
+    buttonOnPress(index) {
+        // 将这个button设置为选中状态，取消其他button的选中状态
+        // 广播点击事件
+        DeviceEventEmitter.emit("selectTabBar", index)
+    }
 
+    // 生成导航栏
+    generateTabBar() {
+
+
+        return this.props.options.map((option, index) => {
+            return (
+                // 如果是第一位和最后一位，则加一个宽度是普通icon一半的view,如果是当前选项，则加一个半透明遮罩
+                <TouchableOpacity style={{
+                    display: this.state.status === 'open' ? 'flex' : 'none',
+                    flexDirection: 'row',
+                }} key={index} onPress={this.buttonOnPress.bind(this, index)}>
+                    {index === 0 ? <Animated.View style={{ width: this.state.leftFillViewWidth }}></Animated.View> : <View></View>}
+                    <Animated.View style={index === this.props.options.length - 1 ? {
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        width: this.state.perWidth,
+                        position: 'relative',
+                    } : {
+                            display: 'flex',
+                            justifyContent: 'flex-start',
+                            alignItems: 'center',
+                            width: this.state.perWidth,
+                            borderRightWidth: 1,
+                            borderRightColor: 'rgba(200,200,200,0.5)',
+                            position: 'relative',
+                        }}>
+                        {option.icon}
+                        <Text style={{
+                            fontSize: 8,
+                            marginTop: 3,
+                            color: option.icon.props.selected ? 'white' : 'darkgrey',
+                            // display: 'none'
+                        }}>{option.label}</Text>
+                    </Animated.View>
+                    {index === this.props.options.length - 1 ? <Animated.View style={{ width: this.state.rightFillViewWidth }}></Animated.View> : <View></View>}
+                </TouchableOpacity>
+            )
+        })
+    }
+
+    render() {
         return (
-            <View style={styles.container}>
-                <TouchableOpacity onPress={this.buttonOnPress.bind(this, 'home')}>
-                    <View style={styles.tab}>
-                        <IndexSvg selected={this.state.visiable.home} width="26" height="26" />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={this.buttonOnPress.bind(this, 'tasks')}>
-                    <View style={styles.tab}>
-                        <TaskTabBarSvg selected={this.state.visiable.tasks} width="35" height="35" />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={this.buttonOnPress.bind(this, 'statistics')}>
-                    <View style={styles.tab}>
-                        <StatisticsBarSvg selected={this.state.visiable.statistics} width="30" height="30" />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={this.buttonOnPress.bind(this, 'mine')}>
-                    <View style={styles.tab}>
-                        <MineBarSvg selected={this.state.visiable.mine} width="26" height="26" />
-                    </View>
-                </TouchableOpacity>
-            </View>
+            <Animated.View style={{
+                display: this.state.status === 'open' ? 'flex' : 'none',
+                flexDirection: 'row',
+                width: this.state.containerWidth,
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: this.props.backgroundColor + "99",
+                height: 45,
+                borderRadius: 24,
+            }}>
+                {this.generateTabBar()}
+            </Animated.View>
         )
     }
 }

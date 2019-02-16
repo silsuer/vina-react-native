@@ -48,26 +48,27 @@ class ButtonRadius extends Component {
 
         let styles = StyleSheet.create({
             container: {
-                width: 50,
-                height: 50,
+                width: this.props.diameter ? this.props.diameter : 50,
+                height: this.props.diameter ? this.props.diameter : 50,
                 backgroundColor: selectButtonBackgroundColor(),
-                borderRadius: 50,
+                borderRadius: 65,
                 justifyContent: 'center',
                 alignItems: 'center',
             },
             text: {
                 color: selectButtonFontColor(),
-                fontSize: 25,
+                fontSize: 8,
+                marginTop: 3,
             },
 
         })
 
         return (
             <TouchableOpacity onPress={this.props.onPress} >
-
                 <View
                     style={styles.container}>
-                    <Text style={styles.text}>{this.props.title}</Text>
+                    {this.props.icon}
+                    {this.props.title ? <Text style={styles.text}>{this.props.title}</Text> : <View></View>}
                 </View>
 
             </TouchableOpacity>

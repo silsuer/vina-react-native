@@ -4,7 +4,7 @@ export default class IndexSvg extends Component {
     render() {
         let color = "darkgrey"
         if (this.props.selected) {
-            color = "grey"
+            color = "white"
         }
         return (
             <Svg t="1550211003793" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" pid="6122" xmlnsXlink="http://www.w3.org/1999/xlink" width={this.props.width} height={this.props.height}>

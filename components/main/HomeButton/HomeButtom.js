@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, PanResponder, Alert, ImageBackground, Image, DeviceEventEmitter } from 'react-native';
-import { createStackNavigator, createAppContainer,withNavigation } from 'react-navigation';
+import { createStackNavigator, createAppContainer, withNavigation } from 'react-navigation';
 import ButtonRadius from '../../common/ButtonRadius/ButtonRadius';
-import TomatoTimer from '../../common/TomatoTimer/TomatoTimer';
+import BottomNavigation from '../../assets/svgs/BottomNavigation/BottomNavigation';
+import BottomTabBar from '../../common/TabBar/BottomTabBar';
 // 首页中的最重要的button，用来制作所有手势
 class HomeButton extends Component {
 
@@ -55,9 +56,11 @@ class HomeButton extends Component {
         // 跳转到开始番茄页面
         // this.props.navigation.navigate('TomatoTimer')
         // 跳转到新建任务页面
-        this.props.navigation.navigate('NewTask')
+        // this.props.navigation.navigate('NewTask')
         // 跳转到首页
         // this.props.navigation.navigate('Index')
+        console.log("触发点击")
+        DeviceEventEmitter.emit("clickHomeButton")  //  触发显示/关闭导航按钮
     }
 
     render() {
@@ -66,22 +69,33 @@ class HomeButton extends Component {
             position: {
                 top: this.state.top,
                 left: this.state.left,
+            },
+            tabBar: {
+                position: 'absolute',
+                bottom: 40,
+                // display:'flex',
+                // justifyContent: 'center',
+                // alignItems: 'center',
             }
         })
 
         return (
             //  在App.js中，这个view应该是浮动在整个页面上面的
-                <View
-                    style={styles.position}
-                    {...this._panResponder.panHandlers}
-                >
-                    <ButtonRadius
-                        onPress={this.homeButtonOnPress.bind(this)}
-                        style={styles.button}
-                        success
-                        title="+"
-                    />
-                </View>
+            <View
+                style={styles.position}
+                {...this._panResponder.panHandlers}
+            >
+
+
+                <ButtonRadius
+                    onPress={this.homeButtonOnPress.bind(this)}
+                    style={styles.button}
+                    diameter={55}
+                    color={this.props.backgroundColor}
+                    icon={<BottomNavigation />}
+                // title="导航"
+                />
+            </View>
         )
     }
 }

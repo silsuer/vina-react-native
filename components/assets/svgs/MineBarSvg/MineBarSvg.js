@@ -4,7 +4,7 @@ export default class MineBarSvg extends Component {
     render() {
         let color = "darkgrey"
         if (this.props.selected) {
-            color = "grey"
+            color = "white"
         }
 
         return (
