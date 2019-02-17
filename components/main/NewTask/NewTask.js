@@ -389,7 +389,7 @@ class NewTask extends Component {
                     <ScrollView >
                         <View style={styles.container}>
                             <View style={styles.header}>
-                                <Header title="新建" />
+                                {/* <Header title="新建" /> */}
                             </View>
                             <List renderHeader='基本'>
                                 <InputItem textAlign="right" placeholder="必填">

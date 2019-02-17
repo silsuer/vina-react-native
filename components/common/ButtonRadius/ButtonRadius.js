@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert,TouchableNativeFeedback } from 'react-native';
 
 
 class ButtonRadius extends Component {
@@ -64,13 +64,12 @@ class ButtonRadius extends Component {
         })
 
         return (
-            <TouchableOpacity onPress={this.props.onPress} >
+            <TouchableOpacity activeOpacity={0.92} onPress={this.props.onPress} >
                 <View
                     style={styles.container}>
                     {this.props.icon}
                     {this.props.title ? <Text style={styles.text}>{this.props.title}</Text> : <View></View>}
                 </View>
-
             </TouchableOpacity>
         )
     }

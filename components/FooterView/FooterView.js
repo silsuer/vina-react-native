@@ -2,10 +2,7 @@ import React, { Component } from 'react';
 import { Dimensions, View, StyleSheet, Image, Animated, Easing, DeviceEventEmitter } from 'react-native';
 import HomeButton from '../main/HomeButton/HomeButtom'
 import BottomTabBar from '../common/TabBar/BottomTabBar'
-import IndexSvg from '../assets/svgs/IndexSvg/IndexSvg'
-import TaskTabBarSvg from '../assets/svgs/TaskTabBarSvg/TaskTabBarSvg'
-import StatisticsBarSvg from '../assets/svgs/StatisticsBarSvg/StatisticsBarSvg'
-import MineBarSvg from '../assets/svgs/MineBarSvg/MineBarSvg'
+
 
 import Config from '../../configs/app'
 const mainWindow = Dimensions.get('window')
@@ -19,7 +16,6 @@ export default class FooterView extends Component {
         this.state = {
             selectIconIndex: 0,  // 默认第一页选中
         }
-
     }
 
 
@@ -52,25 +48,6 @@ export default class FooterView extends Component {
             },
         })
 
-        const tabBarOptions = [
-            {
-                icon: <IndexSvg width="20" selected={this.state.selectIconIndex === 0 ? true : false} height="20" />,
-                label: '首页',
-                name: 'home'
-            },
-            {
-                icon: <TaskTabBarSvg selected={this.state.selectIconIndex === 1 ? true : false} width="20" height="20" />,
-                label: '便签本',
-                name: 'task'
-            },
-            {
-                icon: <StatisticsBarSvg selected={this.state.selectIconIndex === 2 ? true : false} width="25" height="25" />,
-                label: '统计',
-                name: 'statistics'
-            },
-        ];
-
-
         return (
             <View style={styles.container}>
 
@@ -80,7 +57,7 @@ export default class FooterView extends Component {
                     bottom: 40,
                     right: 60,
                 }}>
-                    <BottomTabBar backgroundColor={Config.mainColor} options={tabBarOptions} />
+                    <BottomTabBar backgroundColor={Config.mainColor} options={this.props.tabBarOptions} />
                 </View>
                 {/* 浮动一个圆形button */}
                 <View style={styles.homeButton}>

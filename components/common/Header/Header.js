@@ -5,6 +5,30 @@ const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
 class Header extends Component {
+
+    // 生成左侧渲染
+    generateLeftRender() {
+        // console.log(this.props.left.length)
+        // console.log(this.props.left)
+        return this.props.left.map((option, index) => {
+            return (
+                <TouchableOpacity key={index} onPress={option.props.onPress ? option.props.onPress.bind(this) : null}>
+                    {option}
+                </TouchableOpacity>
+            )
+        })
+    }
+
+    generateRightRender() {
+        return this.props.right.map((option, index) => {
+            return (
+                <TouchableOpacity key={index} onPress={option.props.onPress ? option.props.onPress.bind(this) : null}>
+                    {option}
+                </TouchableOpacity>
+            )
+        })
+    }
+
     render() {
 
         let styles = StyleSheet.create({
@@ -14,13 +38,14 @@ class Header extends Component {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-end',
-                backgroundColor:'#1e2941',
+                backgroundColor: '#1e2941',
             },
             main: {
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
+                paddingLeft: 15,
             },
             title: {
                 fontSize: 18,
@@ -34,17 +59,35 @@ class Header extends Component {
                 height: 40,
                 borderRadius: 20,
                 marginLeft: 20,
+            },
+            rightIcon: {
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                flex: 2,
+                paddingRight:15,
+            },
+            leftIcon: {
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                flex: 3,
             }
         })
 
         return (
             <View style={styles.container}>
                 <View style={styles.main}>
-                    <TouchableOpacity onPress={() => { this.props.navigation.openDrawer() }}>
-                        <Image style={styles.avatar} source={this.props.avatar} />
-                    </TouchableOpacity>
-                    <Text style={styles.title}>{this.props.title}</Text>
+                    <View style={styles.leftIcon}>
+                        {this.generateLeftRender()}
+                        <Text style={styles.title}>{this.props.title}</Text>
+                    </View>
+                    <View style={styles.rightIcon}>
+                        {this.generateRightRender()}
+                    </View>
                 </View>
+
             </View>
         )
     }

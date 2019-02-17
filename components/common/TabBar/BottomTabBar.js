@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, DeviceEventEmitter, Animated, Easing } from 'react-native'
-
+import {withNavigation} from 'react-navigation'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -19,7 +19,8 @@ class BottomTabBar extends Component {
             containerWidth: new Animated.Value(initWidth),
             leftFillViewWidth: new Animated.Value(initWidth),
             rightFillViewWidth: new Animated.Value(initWidth),
-            status: 'close'  // open 导航处于打开状态 close 关闭
+            status: 'close', // open 导航处于打开状态 close 关闭
+            currentIconIndex: 0,  // 当前选中的tab的索引
         }
 
         this.perWidthAnimatedOpen = Animated.timing(
@@ -149,13 +150,15 @@ class BottomTabBar extends Component {
     buttonOnPress(index) {
         // 将这个button设置为选中状态，取消其他button的选中状态
         // 广播点击事件
-        DeviceEventEmitter.emit("selectTabBar", index)
+        // DeviceEventEmitter.emit("selectTabBar", index)
+
+        // 点击导航中的button
+        this.props.navigation.navigate(this.props.options[index].name)
+        this.setState({ currentIconIndex: index })
     }
 
     // 生成导航栏
     generateTabBar() {
-
-
         return this.props.options.map((option, index) => {
             return (
                 // 如果是第一位和最后一位，则加一个宽度是普通icon一半的view,如果是当前选项，则加一个半透明遮罩
@@ -164,7 +167,7 @@ class BottomTabBar extends Component {
                     flexDirection: 'row',
                 }} key={index} onPress={this.buttonOnPress.bind(this, index)}>
                     {index === 0 ? <Animated.View style={{ width: this.state.leftFillViewWidth }}></Animated.View> : <View></View>}
-                    <Animated.View style={index === this.props.options.length - 1 ? {
+                    <Animated.View opacity={this.state.currentIconIndex === index ? 0.9 : 0.5} style={index === this.props.options.length - 1 ? {
                         display: 'flex',
                         justifyContent: 'flex-start',
                         alignItems: 'center',
@@ -183,7 +186,7 @@ class BottomTabBar extends Component {
                         <Text style={{
                             fontSize: 8,
                             marginTop: 3,
-                            color: option.icon.props.selected ? 'white' : 'darkgrey',
+                            color: 'white',
                             // display: 'none'
                         }}>{option.label}</Text>
                     </Animated.View>
@@ -211,4 +214,4 @@ class BottomTabBar extends Component {
     }
 }
 
-export default BottomTabBar
+export default withNavigation(BottomTabBar)
