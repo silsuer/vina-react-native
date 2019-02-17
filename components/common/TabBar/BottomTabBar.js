@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, DeviceEventEmitter, Animated, Easing } from 'react-native'
-import {withNavigation} from 'react-navigation'
+import { withNavigation } from 'react-navigation'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -150,11 +150,13 @@ class BottomTabBar extends Component {
     buttonOnPress(index) {
         // 将这个button设置为选中状态，取消其他button的选中状态
         // 广播点击事件
-        // DeviceEventEmitter.emit("selectTabBar", index)
+        // 导航栏中的切换不走navigation，而是直接响应到mainApp中，用动画切换
+
+        DeviceEventEmitter.emit("selectTabBar", this.props.options[index].name)
+        this.setState({ currentIconIndex: index })
 
         // 点击导航中的button
-        this.props.navigation.navigate(this.props.options[index].name)
-        this.setState({ currentIconIndex: index })
+        // this.props.navigation.navigate(this.props.options[index].name)
     }
 
     // 生成导航栏

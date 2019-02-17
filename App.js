@@ -9,8 +9,6 @@
 
 import React, { Component } from 'react';
 import { ScrollView, StyleSheet, Text, View, Dimensions, DeviceEventEmitter, Animated, Easing, Image } from 'react-native';
-import FooterView from './components/FooterView/FooterView';
-import Header from './components/common/Header/Header';
 import { createStackNavigator, createAppContainer, createDrawerNavigator, SafeAreaView, DrawerItems } from 'react-navigation'
 import LinearGradient from 'react-native-linear-gradient'
 import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
@@ -18,7 +16,6 @@ import NewTask from './components/main/NewTask/NewTask'
 import Index from './components/main/Index/Index'
 import NotesSvg from './components/assets/svgs/NotesSvg';
 import { SlideAvatar, PassowrdBoxSvg, CloudStorageSvg, SettingSvg } from './components/common/SlideIcons'
-import Page from './components/common/Page';
 import NotesMainApp from './components/main/NotesMainApp';
 
 const mainWindow = Dimensions.get('window')
