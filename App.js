@@ -14,7 +14,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
 import NewTask from './components/main/NewTask/NewTask'
 import Index from './components/main/Index/Index'
-import NotesSvg from './components/assets/svgs/NotesSvg';
+import {NotesSvg} from './components/assets/svgs/NotesSvg';
 import { SlideAvatar, PassowrdBoxSvg, CloudStorageSvg, SettingSvg } from './components/common/SlideIcons'
 import NotesMainApp from './components/main/NotesMainApp';
 
@@ -108,25 +108,6 @@ const AppDrawerNavigator = createDrawerNavigator({
 
 
 const AppStackNavigator = createStackNavigator({
-  // Home: Notes,
-  TomatoTimer: {
-    screen: TomatoTimer,
-    navigationOptions: {
-      header: null
-    }
-  },
-  NewTask: {
-    screen: NewTask,
-    navigationOptions: {
-      title: '新建任务'
-    },
-  },
-  Index: {
-    screen: Index,
-    navigationOptions: {
-      header: null
-    }
-  },
   Drawer: {
     screen: AppDrawerNavigator,
     navigationOptions:{

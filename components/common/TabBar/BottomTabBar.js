@@ -136,7 +136,6 @@ class BottomTabBar extends Component {
     }
     // 关闭导航栏
     closeTabBar() {
-        console.log("关闭")
         this.perWidthAnimatedClose.start()
         this.leftFillViewWidthAnimatedClose.start()
         this.rightFillViewWidthAnimatedClose.start(() => {

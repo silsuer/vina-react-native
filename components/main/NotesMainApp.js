@@ -5,10 +5,6 @@ import Page from '../common/Page'
 import { MenuIcon } from '../common/SlideIcons'
 import { IndexSvg, TaskTabBarSvg, StatisticsBarSvg, MineBarSvg } from '../assets/svgs/TabBarIconSvg'
 
-import RecentView from './NotesApp/Recent';
-import All from './NotesApp/All';
-import Statistics from './NotesApp/Statistics';
-
 // 便签本主界面
 export default class NotesMainApp extends Component {
 
@@ -33,15 +29,18 @@ export default class NotesMainApp extends Component {
     getCurrentBodyComponent() {
         switch (this.state.currentPage) {
             case 'notes-all':
+                let All = require('./NotesApp/All').default
                 return (
                     <All />
                 )
             case 'notes-statistics':
+                let Statistics = require('./NotesApp/Statistics').default
                 return (
                     <Statistics />
                 )
             case 'notes-home':
             default:
+                let RecentView = require('./NotesApp/Recent').default
                 return (
                     <RecentView />
                 )
@@ -79,7 +78,7 @@ export default class NotesMainApp extends Component {
                         name: 'notes-statistics'
                     },
                 ]}
-                body={this.getCurrentBodyComponent() }
+                body={this.getCurrentBodyComponent()}
             />
         )
     }

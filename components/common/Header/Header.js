@@ -53,6 +53,7 @@ class Header extends Component {
                 color: this.props.fontColor ? this.props.fontColor : '#000',
                 marginLeft: 10,
                 marginTop: 10,
+                fontWeight:'bold',
             },
             avatar: {
                 width: 40,

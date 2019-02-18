@@ -59,7 +59,6 @@ class HomeButton extends Component {
         // this.props.navigation.navigate('NewTask')
         // 跳转到首页
         // this.props.navigation.navigate('Index')
-        console.log("触发点击")
         DeviceEventEmitter.emit("clickHomeButton")  //  触发显示/关闭导航按钮
     }
 
@@ -73,9 +72,6 @@ class HomeButton extends Component {
             tabBar: {
                 position: 'absolute',
                 bottom: 40,
-                // display:'flex',
-                // justifyContent: 'center',
-                // alignItems: 'center',
             }
         })
 
@@ -83,7 +79,7 @@ class HomeButton extends Component {
             //  在App.js中，这个view应该是浮动在整个页面上面的
             <View
                 style={styles.position}
-                {...this._panResponder.panHandlers}
+                // {...this._panResponder.panHandlers}
             >
 
 
