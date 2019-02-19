@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
 import { withNavigation } from 'react-navigation'
+
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -9,24 +10,33 @@ class Header extends Component {
     // 生成左侧渲染
     generateLeftRender() {
         // console.log(this.props.left.length)
-        // console.log(this.props.left)
-        return this.props.left.map((option, index) => {
-            return (
-                <TouchableOpacity key={index} onPress={option.props.onPress ? option.props.onPress.bind(this) : null}>
-                    {option}
-                </TouchableOpacity>
-            )
-        })
+        // console.log(this.props)
+        if (this.props.left && this.props.left.length > 0) {
+            return this.props.left.map((option, index) => {
+                return (
+                    <TouchableOpacity key={index} onPress={option.props.onPress ? option.props.onPress.bind(this) : null}>
+                        {option}
+                    </TouchableOpacity>
+                )
+            })
+        } else {
+            return null
+        }
+
     }
 
     generateRightRender() {
-        return this.props.right.map((option, index) => {
-            return (
-                <TouchableOpacity key={index} onPress={option.props.onPress ? option.props.onPress.bind(this) : null}>
-                    {option}
-                </TouchableOpacity>
-            )
-        })
+        if (this.props.right && this.props.right.length > 0) {
+            return this.props.right.map((option, index) => {
+                return (
+                    <TouchableOpacity style={{ marginRight: 13 }} key={index} onPress={option.props.onPress ? option.props.onPress.bind(this) : null}>
+                        {option}
+                    </TouchableOpacity>
+                )
+            })
+        } else {
+            return null
+        }
     }
 
     render() {
@@ -53,7 +63,7 @@ class Header extends Component {
                 color: this.props.fontColor ? this.props.fontColor : '#000',
                 marginLeft: 10,
                 marginTop: 10,
-                fontWeight:'bold',
+                fontWeight: 'bold',
             },
             avatar: {
                 width: 40,
@@ -67,7 +77,7 @@ class Header extends Component {
                 justifyContent: 'flex-end',
                 alignItems: 'center',
                 flex: 2,
-                paddingRight:15,
+                paddingRight: 15,
             },
             leftIcon: {
                 flexDirection: 'row',

@@ -8,19 +8,21 @@
  */
 
 import React, { Component } from 'react';
-import { ScrollView, StyleSheet, Text, View, Dimensions, DeviceEventEmitter, Animated, Easing, Image } from 'react-native';
+import { ScrollView, Dimensions, LayoutAnimation } from 'react-native';
 import { createStackNavigator, createAppContainer, createDrawerNavigator, SafeAreaView, DrawerItems } from 'react-navigation'
 import LinearGradient from 'react-native-linear-gradient'
 import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
 import NewTask from './components/main/NewTask/NewTask'
-import Index from './components/main/Index/Index'
-import {NotesSvg} from './components/assets/svgs/NotesSvg';
+import { NotesSvg } from './components/assets/svgs/NotesSvg';
 import { SlideAvatar, PassowrdBoxSvg, CloudStorageSvg, SettingSvg } from './components/common/SlideIcons'
 import NotesMainApp from './components/main/NotesMainApp';
+import NewNote from './components/main/NotesApp/New/NewNote'
 
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
+
+LayoutAnimation.easeInEaseOut()
 
 const CustomDrawerContentComponent = (props) => (
   <LinearGradient locations={[0.2, 1]} colors={['#1e2941', '#8d7f82']} >
@@ -110,13 +112,20 @@ const AppDrawerNavigator = createDrawerNavigator({
 const AppStackNavigator = createStackNavigator({
   Drawer: {
     screen: AppDrawerNavigator,
-    navigationOptions:{
-      header:null,
+    navigationOptions: {
+      header: null,
+    }
+  },
+  notesNewNote: {
+    screen: NewNote,
+    navigationOptions: {
+      header: null
     }
   }
 }, {
-    initialRouteName: 'Drawer',
-    mode:'modal',
+    // initialRouteName: 'Drawer',
+    initialRouteName: 'notesNewNote',
+    mode: 'modal',
   })
 
 

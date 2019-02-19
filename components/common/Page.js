@@ -1,6 +1,6 @@
 // 这里是每个页面的具体框架
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, Animated, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, Animated, ScrollView, DeviceEventEmitter } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import Config from '../../configs/app';
 import Header from './Header/Header'
@@ -11,7 +11,9 @@ class Page extends Component {
         super(props)
         this.state = {
             currentBody: this.props.body,
-            opacity: new Animated.Value(1)
+            opacity: new Animated.Value(1),
+            showModal: false,
+            modalComponent: null,
         }
 
         this.fadeOutAnimated = Animated.timing(
@@ -33,18 +35,18 @@ class Page extends Component {
 
 
     componentWillReceiveProps(props) {
-        // console.log(props)
         if (props.body !== this.state.currentBody) {
-            // 执行动画
-            // 先让旧组件淡出
-            this.fadeOutAnimated.start(() => {
-                // 替换组件
-                this.setState({ currentBody: props.body }, () => {
-                    // 新组件淡入
-                    this.fadeInAnimated.start()
-                })
-            })
+            // LayoutAnimation.easeInEaseOut()
+            this.setState({ currentBody: props.body })
         }
+    }
+
+    componentDidMount() {
+        
+    }
+
+    componentWillUnmount() {
+        
     }
 
     render() {
@@ -56,7 +58,6 @@ class Page extends Component {
                 alignItems: 'center',
             },
             header: {
-                // flex: 1,
             },
             body: {
                 flex: 6,
@@ -65,23 +66,26 @@ class Page extends Component {
             footer: {
                 position: 'absolute',
                 bottom: 0,
-            }
+            },
         });
 
         return (
+                <LinearGradient locations={[0.2, 1]} colors={[Config.mainColor, Config.finishColor]} style={styles.container} >
+                    <View style={styles.header}>
+                        <Header title={this.props.title} fontColor={Config.headerFontColor} left={this.props.left} right={this.props.right} avatar={require('../assets/images/default_avatar.jpg')} />
+                    </View>
+                    <ScrollView>
+                        <Animated.View opacity={this.state.opacity} style={styles.body}>
+                            {this.state.currentBody}
+                        </Animated.View>
+                    </ScrollView>
+                    <FooterView tabBarOptions={this.props.tabBarOptions} />
 
-            <LinearGradient locations={[0.2, 1]} colors={[Config.mainColor, Config.finishColor]} style={styles.container} >
-                <View style={styles.header}>
-                    <Header title={this.props.title} fontColor={Config.headerFontColor} left={this.props.left} right={this.props.right} avatar={require('../assets/images/default_avatar.jpg')} />
-                </View>
-                <ScrollView>
-                    <Animated.View opacity={this.state.opacity} style={styles.body}>
-                        {this.state.currentBody}
-                    </Animated.View>
-                </ScrollView>
-                <FooterView tabBarOptions={this.props.tabBarOptions} />
-            </LinearGradient>
-
+                    {/* 留存dropList的所有 */}
+                    <View>
+                        {this.props.children}
+                    </View>
+                </LinearGradient>
         )
     }
 }

@@ -11,24 +11,6 @@ const windowHeight = mainWindow.height
 
 export default class FooterView extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectIconIndex: 0,  // 默认第一页选中
-        }
-    }
-
-
-    componentDidMount() {
-        this.selectTabBarListener = DeviceEventEmitter.addListener("selectTabBar", (index) => {
-            this.setState({ selectIconIndex: index })
-        })
-    }
-
-    componentWillUnmount() {
-        this.selectTabBarListener.remove()
-    }
-
 
 
 
@@ -57,11 +39,12 @@ export default class FooterView extends Component {
                     bottom: 40,
                     right: 60,
                 }}>
-                    <BottomTabBar backgroundColor={Config.mainColor} options={this.props.tabBarOptions} />
+                    {this.props.tabBarOptions.length === 0 ? <View></View> : <BottomTabBar backgroundColor={Config.mainColor} options={this.props.tabBarOptions} />}
                 </View>
                 {/* 浮动一个圆形button */}
                 <View style={styles.homeButton}>
-                    <HomeButton backgroundColor={Config.mainColor} />
+                    {this.props.tabBarOptions.length === 0 ? <View></View> : <HomeButton backgroundColor={Config.mainColor} />}
+
                 </View>
             </View>
         )

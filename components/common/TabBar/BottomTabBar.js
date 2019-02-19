@@ -20,7 +20,7 @@ class BottomTabBar extends Component {
             leftFillViewWidth: new Animated.Value(initWidth),
             rightFillViewWidth: new Animated.Value(initWidth),
             status: 'close', // open 导航处于打开状态 close 关闭
-            currentIconIndex: 0,  // 当前选中的tab的索引
+            currentIconIndex: this.props.mode === "common" ? -1 : 0,  // 当前选中的tab的索引
         }
 
         this.perWidthAnimatedOpen = Animated.timing(
@@ -36,7 +36,7 @@ class BottomTabBar extends Component {
         this.containerWidthAnimatedOpen = Animated.timing(
             this.state.containerWidth,
             {
-                toValue: (this.props.options.length + 1) * configWidth,
+                toValue: this.props.mode === "common" ? this.props.options.length * configWidth : (this.props.options.length + 1) * configWidth,
                 duration: 100,
                 easing: Easing.linear
             }
@@ -45,7 +45,7 @@ class BottomTabBar extends Component {
         this.leftFillViewWidthAnimatedOpen = Animated.timing(
             this.state.leftFillViewWidth,
             {
-                toValue: configWidth / 2,
+                toValue: this.props.mode === "common" ? 0 : configWidth / 2,
                 duration: 150,
                 easing: Easing.linear
             }
@@ -54,7 +54,7 @@ class BottomTabBar extends Component {
         this.rightFillViewWidthAnimatedOpen = Animated.timing(
             this.state.rightFillViewWidth,
             {
-                toValue: configWidth * 0.7,
+                toValue: this.props.mode === "common" ? 0 : configWidth * 0.7,
                 duration: 150,
                 easing: Easing.linear
             }
@@ -100,6 +100,14 @@ class BottomTabBar extends Component {
     }
 
     componentDidMount() {
+
+        // 组件挂载完毕执行
+        if (this.props.status === 'open') {
+            this.openTabBar()
+        } else {
+            this.closeTabBar()
+        }
+
         // 触发导航栏
         this.clickHomeButtonListener = DeviceEventEmitter.addListener("clickHomeButton", () => {
             if (this.state.status === 'open') {
@@ -160,6 +168,9 @@ class BottomTabBar extends Component {
 
     // 生成导航栏
     generateTabBar() {
+        if (this.props.options === undefined || this.props.options.length === 0) {
+            return null
+        }
         return this.props.options.map((option, index) => {
             return (
                 // 如果是第一位和最后一位，则加一个宽度是普通icon一半的view,如果是当前选项，则加一个半透明遮罩
@@ -167,7 +178,7 @@ class BottomTabBar extends Component {
                     display: this.state.status === 'open' ? 'flex' : 'none',
                     flexDirection: 'row',
                 }} key={index} onPress={this.buttonOnPress.bind(this, index)}>
-                    {index === 0 ? <Animated.View style={{ width: this.state.leftFillViewWidth }}></Animated.View> : <View></View>}
+                    {(index === 0 && this.props.mode !== "common") ? <Animated.View style={{ width: this.state.leftFillViewWidth }}></Animated.View> : <View></View>}
                     <Animated.View opacity={this.state.currentIconIndex === index ? 0.9 : 0.5} style={index === this.props.options.length - 1 ? {
                         display: 'flex',
                         justifyContent: 'flex-start',
@@ -191,7 +202,7 @@ class BottomTabBar extends Component {
                             // display: 'none'
                         }}>{option.label}</Text>
                     </Animated.View>
-                    {index === this.props.options.length - 1 ? <Animated.View style={{ width: this.state.rightFillViewWidth }}></Animated.View> : <View></View>}
+                    {(index === this.props.options.length - 1 && this.props.mode !== "common") ? <Animated.View style={{ width: this.state.rightFillViewWidth }}></Animated.View> : <View></View>}
                 </TouchableOpacity>
             )
         })
@@ -206,6 +217,7 @@ class BottomTabBar extends Component {
                 justifyContent: 'flex-end',
                 alignItems: 'center',
                 backgroundColor: this.props.backgroundColor + "99",
+                // backgroundColor: 'orange',
                 height: 45,
                 borderRadius: 24,
             }}>
