@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { View, Text, Dimensions, StyleSheet } from 'react-native'
 import { Target } from '../assets/svgs/NotesSvg'
+import Config from '../../configs/app'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -137,7 +138,7 @@ export class CardListItem extends Component {
                 borderBottomLeftRadius: borderRadiusSize,
                 borderBottomRightRadius: borderRadiusSize,
                 display: 'flex',
-                alignItems:'center',
+                alignItems: 'center',
             },
             header: {
                 flex: 1,
@@ -225,7 +226,7 @@ export class CardContainer extends Component {
     render() {
         let styles = StyleSheet.create({
             container: {
-                width: this.props.width ? this.props.width : windowWidth * 0.95,
+                width: this.props.width ? this.props.width : windowWidth * Config.cardContainerWidthPercent,
                 backgroundColor: 'white',
                 borderRadius: 5,
                 marginBottom: 10,

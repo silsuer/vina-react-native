@@ -48,29 +48,30 @@ export default class NotesMainApp extends Component {
                     mode="common"  // common 是正常模式 animate是动画弹出模式
                     status="open"
                     backgroundColor="white"
+                    color="black"
                     options={[
                         {
-                            icon: <NoteSvg width="23" height="23" />,
+                            icon: <NoteSvg color="black" width="23" height="23" />,
                             label: '笔记',
                             name: 'notes-new-note'
                         },
                         {
-                            icon: <TaskIcon width="23" height="23" />,
+                            icon: <TaskIcon color="black" width="23" height="23" />,
                             label: '任务',
                             name: 'notes-new-task'
                         },
                         {
-                            icon: <AccountRecordSvg width="25" height="23" />,
+                            icon: <AccountRecordSvg color="black" width="25" height="23" />,
                             label: '账本',
                             name: 'notes-new-account-record'
                         },
                         {
-                            icon: <AnniversarySvg width="23" height="23" />,
+                            icon: <AnniversarySvg color="black" width="23" height="23" />,
                             label: '纪念日',
                             name: 'notes-new-anniversary'
                         },
                         {
-                            icon: <CountdownSvg width="20" height="23" />,
+                            icon: <CountdownSvg color="black" width="20" height="23" />,
                             label: '倒计时',
                             name: 'notes-new-countdown'
                         },
@@ -201,7 +202,7 @@ export default class NotesMainApp extends Component {
                 <Modal
                     visible={this.state.modalVisiable}
                     transparent
-                    style={{ backgroundColor: '#ffffff99' }}
+                    style={{ backgroundColor: '#ffffff' }}
                     maskClosable={true}
                     onClose={() => { this.setState({ modalVisiable: !this.state.modalVisiable, modalComponent: null }) }}
                 >

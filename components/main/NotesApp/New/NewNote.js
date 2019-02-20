@@ -23,17 +23,17 @@ export default class NewNote extends Component {
         let Comp = null
         switch (this.state.editorType) {
             case 'rich-text':
-                Comp = require('../RichTextEditorContainer').default
+                Comp = require('../../../RichText/RichTextEditorContainer').default
                 return (
                     <Comp />
                 )
             case 'markdown-text':
-                Comp = require('../RichTextEditorContainer').default
+                Comp = require('../../../RichText/RichTextEditorContainer').default
                 return (
                     <Comp />
                 )
             case 'hand-account':
-                Comp = require('../RichTextEditorContainer').default
+                Comp = require('../../../RichText/RichTextEditorContainer').default
                 return (
                     <Comp />
                 )

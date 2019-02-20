@@ -11,3 +11,6 @@
 4. 重启电脑
 
 
+### 依赖有手动修改的部分
+
+ - ![解决当使用富文本编辑器的时候报warning的问题](https://github.com/wix/react-native-zss-rich-text-editor/issues/79) 

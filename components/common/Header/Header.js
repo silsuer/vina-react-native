@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
 import { withNavigation } from 'react-navigation'
-
+import Config from '../../../configs/app'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -44,7 +44,7 @@ class Header extends Component {
         let styles = StyleSheet.create({
             container: {
                 width: windowWidth,
-                height: 90,
+                height: Config.PageHeaderHeight,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-end',

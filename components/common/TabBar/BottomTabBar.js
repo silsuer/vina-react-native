@@ -198,7 +198,7 @@ class BottomTabBar extends Component {
                         <Text style={{
                             fontSize: 8,
                             marginTop: 3,
-                            color: 'white',
+                            color: this.props.color ? this.props.color : 'white',
                             // display: 'none'
                         }}>{option.label}</Text>
                     </Animated.View>
@@ -216,7 +216,7 @@ class BottomTabBar extends Component {
                 width: this.state.containerWidth,
                 justifyContent: 'flex-end',
                 alignItems: 'center',
-                backgroundColor: this.props.backgroundColor + "99",
+                backgroundColor: this.props.mode === "common" ? this.props.backgroundColor : this.props.backgroundColor + "99",
                 // backgroundColor: 'orange',
                 height: 45,
                 borderRadius: 24,

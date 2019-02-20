@@ -8,7 +8,7 @@
  */
 
 import React, { Component } from 'react';
-import { ScrollView, Dimensions, LayoutAnimation } from 'react-native';
+import { ScrollView, Dimensions,View } from 'react-native';
 import { createStackNavigator, createAppContainer, createDrawerNavigator, SafeAreaView, DrawerItems } from 'react-navigation'
 import LinearGradient from 'react-native-linear-gradient'
 import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
@@ -22,7 +22,7 @@ const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
 
-LayoutAnimation.easeInEaseOut()
+
 
 const CustomDrawerContentComponent = (props) => (
   <LinearGradient locations={[0.2, 1]} colors={['#1e2941', '#8d7f82']} >
