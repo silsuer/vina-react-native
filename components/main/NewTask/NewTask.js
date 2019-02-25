@@ -1,16 +1,13 @@
 import React, { Component } from 'react'
-import { StyleSheet, ScrollView, View, Text, Dimensions, KeyboardAvoidingView } from 'react-native'
+import { StyleSheet, ScrollView, View, KeyboardAvoidingView, DeviceEventEmitter } from 'react-native'
+import { withNavigation } from 'react-navigation'
 import { Button, List, InputItem, Stepper, DatePicker, Provider, Switch, Modal, Toast, SwipeAction, Picker, TextareaItem } from '@ant-design/react-native'
 import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
-import Header from '../../common/Header/Header'
-const mainWindow = Dimensions.get('window')
-const windowWidth = mainWindow.width
-const windowHeight = mainWindow.height
+import { RemindTask } from '../../../services/model/remind_task'
 
 const styles = StyleSheet.create({
     container: {
-        // width: windowWidth,
-        // height: windowHeight,
+
         backgroundColor: '#f5f5f5',
         display: 'flex',
         flex: 1,
@@ -32,32 +29,36 @@ const styles = StyleSheet.create({
 
 class NewTask extends Component {
 
+    static navigationOptions = {
+        title: '提醒'
+    };
+
     constructor(props) {
         super(props);
         this.state = {
+            id: 0,  // 当前任务的id，0为新建，大于0为修改
             remindModeVisiable: false,  // 是否显示提醒方式模态框
-            remindModeBell: false,  // 提醒方式: 响铃
-            remindModeShock: false,  // 提醒方式: 震动
-            remindModeNotice: false,  // 提醒方式: 通知
+            remindModeBell: true,  // 提醒方式: 响铃
+            remindModeShock: true,  // 提醒方式: 震动
+            remindModeNotice: true,  // 提醒方式: 通知
             subTaskModeVisiable: false,  // 添加/修改子任务时显示的modal
             title: '',        // 任务名
-            tomatoNumber: 1,  // 任务需要的番茄数
+            tomatoNumber: 0,  // 任务需要的番茄数
             remindTime: {    // 提醒时间，默认都是-1，没有时间限制
                 hour: -1,
                 minute: -1,
             },
             nowSelectRemindTime: null,
             tmpSubTaskData: {      // 临时保存子任务的对象
+                id: 0,
                 title: '',
                 tomatoNumber: 0,
                 tmpIndex: -1,     // 如果是-1，则是新建子任务，如果 >-1 则是修改子任务，index对应数据索引
             },
             repeatData: [['only']],  // 重复项数据
-            subTaskData: [{  // 子任务数据列表
-                title: '无',
-                tomatoNumber: 0,
-            }],
+            subTaskData: [],  // 子任务 id title tomatoNumber
             taskComment: '',  // 备注
+            saveButtonDisabled: false   // 保存按钮是否可用，用于点击
         }
 
         // 返回每个月的选择options
@@ -125,6 +126,51 @@ class NewTask extends Component {
 
     }
 
+    // 挂载方法
+    componentDidMount() {
+        // 当传入的参数中存在id的时候，去数据库中取出相关数据，并赋值给state
+        let id = this.props.navigation.getParam('id', 0)
+        if (id > 0) {
+            let r = new RemindTask()
+            r.findOne(id).then((res) => {
+
+                // 先根据结果判断提醒方式
+                let b = false
+                let n = false
+                let s = false
+                remindType = res.remind_type.split(",")
+                for (let i = 0; i < remindType.length; i++) {
+                    switch (parseInt(remindType[i])) {
+                        case RemindTask.modeBell:
+                            b = true
+                            break
+                        case RemindTask.modeNotice:
+                            n = true
+                            break
+                        case RemindTask.modeShock:
+                            s = true
+                            break
+                    }
+                }
+
+                console.log(res)
+                this.setState({
+                    id: res.id,
+                    title: res.title,
+                    tomatoNumber: res.tomato_number,
+                    nowSelectRemindTime: res.remind_at ? new Date("2019/02/14 " + res.remind_at) : null,
+                    repeatData: res.repeat,
+                    remindModeBell: b,
+                    remindModeNotice: n,
+                    remindModeShock: s,
+                    taskComment: res.comment,
+                    subTaskData: res.subTaskData
+                })
+            })
+        }
+    }
+
+
     // 选择提醒方式，点击后弹出选择方式的模态框
     clickRemindMode() {
         this.setState({ remindModeVisiable: true })
@@ -142,11 +188,11 @@ class NewTask extends Component {
 
     // 清空提醒时间
     clearRemindTime() {
-        this.setState({ remindTime: { hour: -1, minute: -1 }, nowSelectRemindTime: null })
+        this.setState({ nowSelectRemindTime: null })
     }
     // 更改提醒时间
     changeRemindTime(date) {
-        console.log(date.getHours())
+        // console.log(date.getHours())
         this.setState({ remindTime: { hour: date.getHours(), minute: date.getMinutes() }, nowSelectRemindTime: date })
     }
     // 更改提醒方式
@@ -200,7 +246,13 @@ class NewTask extends Component {
                 ]
             }
         }
-        return this.state.subTaskData.map((data, index) => {
+
+        let d = this.state.subTaskData
+        if (d.length === 0) {
+            d = [{ id: 0, title: '无', tomatoNumber: 0 }]
+        }
+
+        return d.map((data, index) => {
             return (
                 <SwipeAction key={index}
                     autoClose
@@ -227,7 +279,6 @@ class NewTask extends Component {
     }
     // 生成重复项的部分
     generateRepeatRender() {
-
         return this.state.repeatData.map((option, index) => {
             const title = "重复" + (index === 0 ? '' : index)
             return (
@@ -265,11 +316,15 @@ class NewTask extends Component {
     addSubTaskItem(index) {
         // 弹出一个任务框modal，记录子任务的名称和番茄数
         // 弹出窗口时要先清空临时任务对象
-        this.setState({ subTaskModeVisiable: true, tmpSubTaskData: { title: '', tomatoNumber: 0, tmpIndex: -1 } })
+        this.setState({ subTaskModeVisiable: true, tmpSubTaskData: { id: 0, title: '', tomatoNumber: 0, tmpIndex: -1 } })
     }
 
     // 编辑重复项
     editRepeatItem(index) {
+        if (this.state.subTaskData.length === 0) { // 如果子任务为空，编辑就是新建
+            this.addSubTaskItem()
+            return
+        }
         currentItem = this.state.subTaskData[index]
         currentItem.tmpIndex = index
         this.setState({ tmpSubTaskData: currentItem, subTaskModeVisiable: true })
@@ -298,7 +353,6 @@ class NewTask extends Component {
             data[index] = value;
             this.setState({ repeatData: data })
         }
-
     }
 
     // 保存子任务
@@ -326,16 +380,11 @@ class NewTask extends Component {
         if (this.state.tmpSubTaskData.tmpIndex === -1) {  // 如果是保存
             // 传入当前子任务数组中
             // 如果当前子任务第一个是空的话，则改为修改
-            if (this.state.subTaskData.length == 1 && this.state.subTaskData[0].title === "无" && this.state.subTaskData[0].tomatoNumber === 0) {
-                data = [this.state.tmpSubTaskData]
-            } else {  // 有效子任务，放入子任务列表尾部
-                data.push(this.state.tmpSubTaskData)
-            }
+            data.push(this.state.tmpSubTaskData)
         } else {
             // 修改
-            data[this.state.tmpSubTaskData.tmpIndex] = { title: this.state.tmpSubTaskData.title, tomatoNumber: this.state.tmpSubTaskData.tomatoNumber }
+            data[this.state.tmpSubTaskData.tmpIndex] = { id: this.state.tmpSubTaskData.id, title: this.state.tmpSubTaskData.title, tomatoNumber: this.state.tmpSubTaskData.tomatoNumber }
         }
-
         // 清空临时子任务数组
         this.clearTmpSubTaskData()
         // 关闭模态框
@@ -365,7 +414,7 @@ class NewTask extends Component {
 
     // 清除临时子任务数据
     clearTmpSubTaskData() {
-        this.setState({ tmpSubTaskData: { title: '', tomatoNumber: 0 } })
+        this.setState({ tmpSubTaskData: { id: 0, title: '', tomatoNumber: 0 } })
     }
 
     // 修改主任务番茄数
@@ -375,11 +424,76 @@ class NewTask extends Component {
 
     // 点击保存后将任务保存到数据库
     saveTask() {
-        console.log(this.state)
-        // 验证必填项
-        // 过滤无效项
-        // 生成任务对象
-        // 触发保存事件
+        // 保存
+        this.setState({ saveButtonDisabled: true }, () => {
+            let obj = {}
+            // 验证必填项
+            if (!this.state.title) {  // 名称
+                Toast.fail("请输入提醒名称")
+                this.setState({ saveButtonDisabled: false })
+                return
+            } else {
+                obj.title = this.state.title
+            }
+            if (this.state.id) {  // id
+                obj.id = this.state.id
+            }
+            if (this.state.tomatoNumber) {  // 番茄数
+                obj.tomato_number = this.state.tomatoNumber
+            } else {
+                obj.tomato_number = 0
+            }
+            if (this.state.nowSelectRemindTime) {  // 提醒时间
+                obj.remind_at = this.state.nowSelectRemindTime.toLocaleTimeString('chinese', { hour12: false })
+            }
+            let remindType = []
+            if (this.state.remindModeBell) { // 响铃
+                remindType.push(RemindTask.modeBell)
+            }
+            if (this.state.remindModeShock) { // 震动
+                remindType.push(RemindTask.modeShock)
+            }
+            if (this.state.remindModeNotice) { // 通知
+                remindType.push(RemindTask.modeNotice)
+            }
+            obj.remind_type = remindType.join(',')  // 提醒类型
+            if (this.state.repeatData) {  // 重复
+                obj.repeat = JSON.stringify(this.state.repeatData)  // 传到模型里进行额外处理
+            }
+            if (this.state.subTaskData && this.state.subTaskData.length > 0) {  // 子任务
+                obj.subTaskData = this.state.subTaskData
+            }
+            if (this.state.taskComment) {
+                obj.comment = {
+                    type: 1,  //0 纯文本 1 富文本 2 markdown 3 手帐
+                    content: this.state.taskComment
+                }
+            }
+            // 生成任务对象
+            task = new RemindTask()
+            // 保存对象
+            let saveResult = null
+            if (this.state.id > 0) {  // 更新对象
+                saveResult = task.update(obj)
+            } else {  // 创建对象
+                saveResult = task.create(obj)
+            }
+            saveResult.then((saveResult) => {
+                this.setState({ saveButtonDisabled: false })
+                if (saveResult === false) {
+                    Toast.fail("保存失败，请联系开发者查看操作日志")
+                } else {
+                    // 跳转到任务列表页
+                    Toast.success("保存成功")
+                    // 触发刷新列表事件
+                    // DeviceEventEmitter.emit("refresh-all-notes-list")
+                    this.props.navigation.navigate('Notes', { pageName: 'notes-all', refreshList: true })
+                }
+
+            })
+
+        })
+
     }
 
     render() {
@@ -392,12 +506,12 @@ class NewTask extends Component {
                                 {/* <Header title="新建" /> */}
                             </View>
                             <List renderHeader='基本'>
-                                <InputItem textAlign="right" placeholder="必填">
+                                <InputItem textAlign="right" value={this.state.title} onChange={(value) => { this.setState({ title: value }) }} placeholder="必填">
                                     任务名
                    </InputItem>
                                 <List.Item
                                     extra={
-                                        <Stepper key="2" min={1} onChange={this.changeTaskTomatoNumber.bind(this)} value={this.state.tomatoNumber} readOnly={false} />
+                                        <Stepper key="2" min={0} onChange={this.changeTaskTomatoNumber.bind(this)} value={this.state.tomatoNumber} readOnly={false} />
                                     }
                                 >
                                     番茄数
@@ -418,7 +532,7 @@ class NewTask extends Component {
                                         title="提醒时间"
                                         mode="time"
                                         value={this.state.nowSelectRemindTime}
-                                        extra={(this.state.remindTime.hour === -1 && this.state.remindTime.minute === -1) ? '无' : (this.getRemindTimeString.bind(this))}
+                                        extra={this.state.nowSelectRemindTime ? this.state.nowSelectRemindTime : "无"}
                                         onChange={this.changeRemindTime.bind(this)}
                                     >
                                         <List.Item arrow="horizontal">提醒时间</List.Item>
@@ -459,6 +573,7 @@ class NewTask extends Component {
                                 type="primary"
                                 style={{ marginTop: 30 }}
                                 onPress={this.saveTask.bind(this)}
+                                disabled={this.state.saveButtonDisabled}
                             >保存</Button>
 
                         </View>
@@ -470,12 +585,12 @@ class NewTask extends Component {
                             closable
                             maskClosable
                             animationType="slide-up"
+                            onClose={() => { this.closeRemindModeModal() }}
                         >
                             <List renderHeader="提醒方式">
                                 <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'bell')} checked={this.state.remindModeBell} />}>响铃</List.Item>
                                 <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'shock')} checked={this.state.remindModeShock} />}>震动</List.Item>
-                                <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'notice')} checked={this.state.remindModeNotice} />}>通知</List.Item>
-                                <List.Item> <Button onPress={this.closeRemindModeModal.bind(this)} type="primary">关闭</Button> </List.Item>
+                                <List.Item style={{ marginBottom: 10 }} extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'notice')} checked={this.state.remindModeNotice} />}>通知</List.Item>
                             </List>
                         </Modal>
 
@@ -513,4 +628,4 @@ class NewTask extends Component {
     }
 }
 
-export default NewTask
+export default withNavigation(NewTask)

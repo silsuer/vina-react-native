@@ -16,11 +16,20 @@ export default class RecentView extends Component {
                     <CardBody>
                         <CardList>
                             <CardListItem
-                                icon="blue"
+                                // icon="white"
+                                targetColor="white"
+                                icon={<TaskIcon color="orange" width="12" height="12" />}
                                 title="这是标题"
                                 headerExtra={[<Text style={{ color: 'grey' }}>12:00</Text>, <TaskIcon width="20" height="20" color="blue" />]}
                                 contentExtra={[<Image source={require('../../assets/images/default_avatar.jpg')} style={{ width: 40, height: 40 }} />]}
                                 content="这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的故事"
+                            />
+                             <CardListItem
+                                targetColor="blue"
+                                icon={<TaskIcon color="black" width="12" height="12" />}
+                                title="这是标题"
+                                headerExtra={[]}
+                                contentExtra={[]}
                             />
                         </CardList>
                     </CardBody>

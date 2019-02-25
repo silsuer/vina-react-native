@@ -8,10 +8,10 @@
  */
 
 import React, { Component } from 'react';
-import { ScrollView, Dimensions,View } from 'react-native';
+import { ScrollView, Dimensions, View } from 'react-native';
 import { createStackNavigator, createAppContainer, createDrawerNavigator, SafeAreaView, DrawerItems } from 'react-navigation'
 import LinearGradient from 'react-native-linear-gradient'
-import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
+// import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
 import NewTask from './components/main/NewTask/NewTask'
 import { NotesSvg } from './components/assets/svgs/NotesSvg';
 import { SlideAvatar, PassowrdBoxSvg, CloudStorageSvg, SettingSvg } from './components/common/SlideIcons'
@@ -22,7 +22,7 @@ const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
 
-
+import './services/init'
 
 const CustomDrawerContentComponent = (props) => (
   <LinearGradient locations={[0.2, 1]} colors={['#1e2941', '#8d7f82']} >
@@ -53,41 +53,41 @@ const AppDrawerNavigator = createDrawerNavigator({
       ),
     }
   },
-  PasswordBox: {
-    screen: NewTask,
-    mode: 'modal',
-    navigationOptions: {
-      header: null,
-      drawerLabel: '密码箱',
-      title: '密码箱',
-      drawerIcon: () => (
-        <PassowrdBoxSvg width="25" height="25" />
-      ),
-    }
-  },
-  CloudStorage: {
-    screen: TomatoTimer,
-    navigationOptions: {
-      header: null,
-      mode: 'modal',
-      drawerLabel: '私有云盘',
-      title: '私有云盘',
-      drawerIcon: () => (
-        <CloudStorageSvg width="25" height="25" />
-      ),
-    }
-  },
-  Setting: {
-    screen: NotesMainApp,
-    navigationOptions: {
-      header: null,
-      drawerLabel: '设置',
-      title: '设置',
-      drawerIcon: () => (
-        <SettingSvg width="20" height="20" />
-      ),
-    }
-  },
+  // PasswordBox: {
+  //   screen: NewTask,
+  //   mode: 'modal',
+  //   navigationOptions: {
+  //     header: null,
+  //     drawerLabel: '密码箱',
+  //     title: '密码箱',
+  //     drawerIcon: () => (
+  //       <PassowrdBoxSvg width="25" height="25" />
+  //     ),
+  //   }
+  // },
+  // CloudStorage: {
+  //   screen: TomatoTimer,
+  //   navigationOptions: {
+  //     header: null,
+  //     mode: 'modal',
+  //     drawerLabel: '私有云盘',
+  //     title: '私有云盘',
+  //     drawerIcon: () => (
+  //       <CloudStorageSvg width="25" height="25" />
+  //     ),
+  //   }
+  // },
+  // Setting: {
+  //   screen: NotesMainApp,
+  //   navigationOptions: {
+  //     header: null,
+  //     drawerLabel: '设置',
+  //     title: '设置',
+  //     drawerIcon: () => (
+  //       <SettingSvg width="20" height="20" />
+  //     ),
+  //   }
+  // },
 }, {
     contentComponent: CustomDrawerContentComponent,
     drawerType: 'slide',
@@ -121,10 +121,13 @@ const AppStackNavigator = createStackNavigator({
     navigationOptions: {
       header: null
     }
+  },
+  newRemindTask: {
+    screen: NewTask,
   }
 }, {
-    // initialRouteName: 'Drawer',
-    initialRouteName: 'notesNewNote',
+    initialRouteName: 'Drawer',
+    // initialRouteName: 'newRemindTask',
     mode: 'modal',
   })
 

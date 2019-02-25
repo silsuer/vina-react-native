@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { View, Text, Dimensions, StyleSheet } from 'react-native'
-import { Target } from '../assets/svgs/NotesSvg'
+import { View, Text, Dimensions, StyleSheet, TouchableOpacity } from 'react-native'
+import { SwipeAction } from '@ant-design/react-native'
 import Config from '../../configs/app'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
@@ -109,11 +109,20 @@ export class CardList extends Component {
 
 export class CardListItem extends Component {
 
+    // static defaultProps = {
+    //     headerExtra: [],
+    //     contentExtra: [],
+    // }
+    // static propTypes = {
+    //     headerExtra,
+    //     contentExtra,
+    // }
     // 渲染上方右侧组件
     generateHeaderExtraRender() {
+        if (!this.props.headerExtra) return null
         return this.props.headerExtra.map((el, index) => {
             return (
-                <View key={index}>
+                <View key={index} style={{ marginLeft: 10 }}>
                     {el}
                 </View>
             )
@@ -122,6 +131,7 @@ export class CardListItem extends Component {
 
     // 渲染下方右侧组件
     generateContentExtraRender() {
+        if (!this.props.contentExtra) return null
         return this.props.contentExtra.map((el, index) => {
             return (
                 <View key={index}>
@@ -134,9 +144,8 @@ export class CardListItem extends Component {
         let styles = StyleSheet.create({
             container: {
                 backgroundColor: '#ffffff',
-                height: 90,
-                borderBottomLeftRadius: borderRadiusSize,
-                borderBottomRightRadius: borderRadiusSize,
+                height: this.props.content ? 80 : 50,
+                borderRadius: borderRadiusSize,
                 display: 'flex',
                 alignItems: 'center',
             },
@@ -146,74 +155,100 @@ export class CardListItem extends Component {
                 flexDirection: 'row',
             },
             headerIcon: {
-                flex: 1,
+                flex: 1.5,
                 justifyContent: 'center',
                 alignItems: 'center',
             },
             headerTitle: {
-                flex: 5,
-                justifyContent: 'center',
+                flex: 11,
+                justifyContent: 'flex-start',
+                flexDirection: 'row',
+                alignItems: 'center'
             },
             headerTitleText: {
                 fontWeight: 'bold',
+                fontSize: 17
             },
             headerExtra: {
-                flex: 2,
-                justifyContent: 'space-around',
+                flex: 3,
+                justifyContent: 'flex-end',
                 alignItems: 'center',
                 flexDirection: 'row',
                 marginRight: 10,
             },
             content: {
-                flex: 1.5,
-                display: 'flex',
+                display: this.props.content ? 'flex' : 'none',
+                flex: 1,
                 flexDirection: 'row',
             },
+            contentIcon: {
+                flex: 1.5,
+                justifyContent: 'center',
+                alignItems: 'center',
+            },
             contentDetail: {
-                flex: 5,
+                flex: this.props.contentExtra && (this.props.contentExtra.length > 0) ? 11 : 14,
                 paddingTop: 0,
                 paddingBottom: 2,
+            },
+            contentExtra: {
+                flex: this.props.contentExtra && (this.props.contentExtra.length > 0) ? 3 : 0,
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                flexDirection: 'row',
+                marginRight: 10,
             },
             bottom: {
                 borderBottomWidth: 0.3,
                 borderBottomColor: '#d4d4d4',
                 width: windowWidth * 0.7,
+                backgroundColor: '#d4d4d4',
             }
         })
         return (
-            <View style={styles.container}>
-                {/* 上 */}
-                <View style={styles.header}>
-                    {/* 标记 */}
-                    <View style={styles.headerIcon}><Target color={this.props.icon} width="10" height="10" /></View>
-                    {/* 上左 */}
-                    <View style={styles.headerTitle}>
-                        <Text style={styles.headerTitleText}>{this.props.title}</Text>
-                    </View>
-                    {/* 上右 */}
-                    <View style={styles.headerExtra}>
-                        {this.generateHeaderExtraRender()}
-                    </View>
-                </View>
-                {/* 下 */}
-                <View style={styles.content}>
-                    {/* 下方标记 */}
-                    <View style={styles.headerIcon}>
+            <SwipeAction
+                style={{ borderRadius: borderRadiusSize }}
+                left={this.props.swipeLeft}
+                right={this.props.swipeRight}
+                autoClose
+            >
+                <TouchableOpacity activeOpacity={0.8} onPress={this.props.onPress}>
+                    <View style={styles.container}>
+                        {/* 上 */}
+                        <View style={styles.header}>
+                            {/* 标记 */}
+                            <View style={styles.headerIcon}>
+                                {this.props.headerIcon}
+                            </View>
+                            {/* 上左 */}
+                            <View style={styles.headerTitle}>
+                                <Text style={styles.headerTitleText}>{this.props.title}</Text>
+                            </View>
+                            {/* 上右 */}
+                            <View style={styles.headerExtra}>
+                                {this.generateHeaderExtraRender()}
+                            </View>
+                        </View>
+                        {/* 下 */}
+                        <View style={styles.content}>
+                            {/* 下方标记 */}
+                            <View style={styles.contentIcon}>
 
+                            </View>
+                            {/* 内容 */}
+                            <View style={styles.contentDetail}>
+                                <Text style={{ color: "#000000BB" }}>{this.props.content}</Text>
+                            </View>
+                            {/* 下右（图片） */}
+                            <View style={styles.contentExtra}>
+                                {this.generateContentExtraRender()}
+                            </View>
+                        </View>
+                        <View style={styles.bottom}>
+                        </View>
                     </View>
-                    {/* 内容 */}
-                    <View style={styles.contentDetail}>
-                        <Text>{this.props.content}</Text>
-                    </View>
-                    {/* 下右（图片） */}
-                    <View style={styles.headerExtra}>
-                        {this.generateContentExtraRender()}
-                    </View>
-                </View>
-                <View style={styles.bottom}>
-
-                </View>
-            </View>
+                </TouchableOpacity>
+            </SwipeAction>
         )
     }
 }
