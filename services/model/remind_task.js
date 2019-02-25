@@ -21,7 +21,7 @@ export class RemindTask {
     static modeShock = 2  // 震动
     static modeNotice = 3 // 通知
 
-    create(obj) {
+    async create(obj) {
         // 获取带有占位符得插入语句和要插入的数据数组
         // 插入主任务
         const mainInsert = () => {
