@@ -45,6 +45,8 @@
 		B027C362221BB1D60052A58C /* libReact-Native-Webview-Bridge.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B027C361221BB1C60052A58C /* libReact-Native-Webview-Bridge.a */; };
 		B027C363221BB1E70052A58C /* libReact-Native-Webview-Bridge.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B027C361221BB1C60052A58C /* libReact-Native-Webview-Bridge.a */; };
 		B068C45D221273C000618BD5 /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B068C44A221270EE00618BD5 /* libART.a */; };
+		B0B48DC722252E290091AFEE /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B0B48DA522252E0E0091AFEE /* libRCTPushNotification.a */; };
+		B0B48DC822252E550091AFEE /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B0B48DA522252E0E0091AFEE /* libRCTPushNotification.a */; };
 		B1E998BC072B41CB82C5F911 /* libRNGestureHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C3B9823D22154865851E4498 /* libRNGestureHandler.a */; };
 		B8414737B9EC4402A2E5589B /* libreactnativeuilib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DD46F1BC56AC4CC681149666 /* libreactnativeuilib.a */; };
 		BB287D6DC42840078154E71D /* antoutline.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BD5AF54D1B804146925FE169 /* antoutline.ttf */; };
@@ -396,6 +398,20 @@
 			remoteGlobalIDString = ED296FEE214C9CF800B7C4FE;
 			remoteInfo = "jsiexecutor-tvOS";
 		};
+		B0B48DA422252E0E0091AFEE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B0B48D8F22252E0E0091AFEE /* RCTPushNotification.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RCTPushNotification;
+		};
+		B0B48DA622252E0E0091AFEE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B0B48D8F22252E0E0091AFEE /* RCTPushNotification.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3D05745F1DE6004600184BB4;
+			remoteInfo = "RCTPushNotification-tvOS";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -436,6 +452,7 @@
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		B027C35C221BB1C60052A58C /* React-Native-Webview-Bridge.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "React-Native-Webview-Bridge.xcodeproj"; path = "../node_modules/react-native-webview-bridge/ios/React-Native-Webview-Bridge.xcodeproj"; sourceTree = "<group>"; };
 		B068C444221270EE00618BD5 /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
+		B0B48D8F22252E0E0091AFEE /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		BD5AF54D1B804146925FE169 /* antoutline.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = antoutline.ttf; path = "../node_modules/@ant-design/icons-react-native/fonts/antoutline.ttf"; sourceTree = "<group>"; };
 		C3B9823D22154865851E4498 /* libRNGestureHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNGestureHandler.a; sourceTree = "<group>"; };
 		DD46F1BC56AC4CC681149666 /* libreactnativeuilib.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libreactnativeuilib.a; sourceTree = "<group>"; };
@@ -449,6 +466,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B0B48DC822252E550091AFEE /* libRCTPushNotification.a in Frameworks */,
 				B027C362221BB1D60052A58C /* libReact-Native-Webview-Bridge.a in Frameworks */,
 				140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */,
 			);
@@ -458,6 +476,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B0B48DC722252E290091AFEE /* libRCTPushNotification.a in Frameworks */,
 				B027C363221BB1E70052A58C /* libReact-Native-Webview-Bridge.a in Frameworks */,
 				B068C45D221273C000618BD5 /* libART.a in Frameworks */,
 				ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */,
@@ -656,6 +675,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				B0B48D8F22252E0E0091AFEE /* RCTPushNotification.xcodeproj */,
 				B027C35C221BB1C60052A58C /* React-Native-Webview-Bridge.xcodeproj */,
 				B068C444221270EE00618BD5 /* ART.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
@@ -792,6 +812,15 @@
 			children = (
 				B06DA9252217F1000050BB21 /* libBVLinearGradient.a */,
 				B06DA9272217F1000050BB21 /* libBVLinearGradient.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B0B48D9022252E0E0091AFEE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B0B48DA522252E0E0091AFEE /* libRCTPushNotification.a */,
+				B0B48DA722252E0E0091AFEE /* libRCTPushNotification-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -955,6 +984,10 @@
 				{
 					ProductGroup = 00C302D41ABCB9D200DB3ED1 /* Products */;
 					ProjectRef = 00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */;
+				},
+				{
+					ProductGroup = B0B48D9022252E0E0091AFEE /* Products */;
+					ProjectRef = B0B48D8F22252E0E0091AFEE /* RCTPushNotification.xcodeproj */;
 				},
 				{
 					ProductGroup = 139105B71AF99BAD00B5F7CC /* Products */;
@@ -1335,6 +1368,20 @@
 			fileType = archive.ar;
 			path = "libjsiexecutor-tvOS.a";
 			remoteRef = B07910FB2201AD4400322C24 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B0B48DA522252E0E0091AFEE /* libRCTPushNotification.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRCTPushNotification.a;
+			remoteRef = B0B48DA422252E0E0091AFEE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B0B48DA722252E0E0091AFEE /* libRCTPushNotification-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libRCTPushNotification-tvOS.a";
+			remoteRef = B0B48DA622252E0E0091AFEE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

@@ -1,6 +1,7 @@
 import React, { Component } from 'React';
 import { Svg, Path } from 'react-native-svg';
 
+// loading
 export class LoadingSvg extends Component {
     render() {
         let color = this.props.color ? this.props.color : "white"
@@ -230,3 +231,28 @@ export class EditorSvg extends Component {
     }
 }
 
+// 任务启动
+export class TaskStartSvg extends Component {
+    render() {
+        let color = this.props.color ? this.props.color : 'white'
+        return (
+            <Svg t="1551158791165" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" pid="1121" xmlnsXlink="http://www.w3.org/1999/xlink" width={this.props.width ? this.props.width : 25} height={this.props.height ? this.props.height : 25}>
+                <Path d="M686.372571 526.774857L437.174857 690.980571A24.137143 24.137143 0 0 1 406.674286 687.542857a16.969143 16.969143 0 0 1-4.388572-11.337143v-328.411428c0-10.24 9.654857-18.651429 21.650286-18.651429 4.754286 0 9.362286 1.316571 13.165714 3.876572l249.197715 164.205714c9.508571 6.217143 11.264 17.92 4.022857 26.112a20.48 20.48 0 0 1-4.022857 3.437714h0.073142zM512 950.857143a438.857143 438.857143 0 1 0 0.219429-877.714286H512a438.857143 438.857143 0 0 0 0 877.714286z m0 73.142857A512 512 0 1 1 512 0a512 512 0 0 1 0 1024z" fill={color} pid="1122">
+                </Path>
+            </Svg>
+        )
+    }
+}
+
+// 返回
+export class GoBackSvg extends Component {
+    render() {
+        let color = this.props.color ? this.props.color : 'white'
+        return (
+            <Svg t="1551161370138" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" pid="1948" xmlnsXlink="http://www.w3.org/1999/xlink" width={this.props.width ? this.props.width : 25} height={this.props.height ? this.props.height : 25}>
+                <Path d="M741.711775 210.479759 649.950885 118.718869 256.69022 511.978511 649.950885 905.239176 741.711775 813.478286 440.212 511.978511Z" pid="1949" fill={color}>
+                </Path>
+            </Svg>
+        )
+    }
+}

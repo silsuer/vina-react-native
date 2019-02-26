@@ -11,13 +11,12 @@ import React, { Component } from 'react';
 import { ScrollView, Dimensions, View } from 'react-native';
 import { createStackNavigator, createAppContainer, createDrawerNavigator, SafeAreaView, DrawerItems } from 'react-navigation'
 import LinearGradient from 'react-native-linear-gradient'
-// import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
 import NewTask from './components/main/NewTask/NewTask'
 import { NotesSvg } from './components/assets/svgs/NotesSvg';
 import { SlideAvatar, PassowrdBoxSvg, CloudStorageSvg, SettingSvg } from './components/common/SlideIcons'
 import NotesMainApp from './components/main/NotesMainApp';
 import NewNote from './components/main/NotesApp/New/NewNote'
-
+import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -124,6 +123,12 @@ const AppStackNavigator = createStackNavigator({
   },
   newRemindTask: {
     screen: NewTask,
+  },
+  tomatoTimer: {
+    screen: TomatoTimer,
+    navigationOptions: {
+      header: null
+    }
   }
 }, {
     initialRouteName: 'Drawer',

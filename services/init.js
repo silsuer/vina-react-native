@@ -4,6 +4,7 @@
 var SQLite = require('react-native-sqlite-storage')
 var db = SQLite.openDatabase("vina.db", "1.0", "vina database", 200000, () => { console.log("opened database") }, (err) => { console.log("SqlErr:", err) })
 
+
 // 创建任务表
 db.transaction((tx) => {
     tx.executeSql(`create table if not exists remind_task (
@@ -56,8 +57,47 @@ db.transaction((tx) => {
         repeat_id int
     )`)
 }, (err) => {
-    console.log("创建任务-重复关联表")
+    console.log("创建任务-重复关联表失败:", err)
 })
+
+// db.transaction((tx) => {
+//     tx.executeSql(`drop table tomato_timer`, [], () => {
+//         console.log("success")
+//     })
+// })
+
+// 创建番茄钟历史表
+db.transaction((tx) => {
+    tx.executeSql(`create table if not exists tomato_timer (
+       id integer primary key not null,
+       final_status int not null default 0,
+       start_at datetime,
+       end_at datetime,
+       mode varchar(200) not null default 'work',
+       relation_task_id int not null default 0,
+       post_id int not null default 0
+   )`)
+}, (err) => {
+    console.log("创建番茄钟历史表:", err)
+})
+
+
+// db.transaction((tx) => {
+//     tx.executeSql(`drop table push_notification_records`, [], () => {
+//         console.log("success")
+//     })
+// })
+// 创建推送通知表
+db.transaction((tx) => {
+    tx.executeSql(`create table if not exists push_notification_records (
+        id integer primary key not null,
+        type int,
+        time datetime,
+        relation_id int not null default 0,
+        is_deleted int not null default 0
+    )`)
+})
+
 
 Date.prototype.format = function (fmt) {
     var o = {
@@ -79,5 +119,73 @@ Date.prototype.format = function (fmt) {
     }
     return fmt;
 }
+
+// 本地存储
+import Storage from 'react-native-storage'
+import { AsyncStorage } from 'react-native'
+
+const storage = new Storage({
+    // 最大容量，默认值1000条数据循环存储
+    size: 1000,
+
+    // 存储引擎：对于RN使用AsyncStorage，对于web使用window.localStorage
+    // 如果不指定则数据只会保存在内存中，重启后即丢失
+    storageBackend: AsyncStorage,
+
+    // 数据过期时间，默认一整天（1000 * 3600 * 24 毫秒），设为null则永不过期
+    defaultExpires: null,
+
+    // 读写时在内存中缓存数据。默认启用。
+    enableCache: true, // 你可以在构造函数这里就写好sync的方法 // 或是在任何时候，直接对storage.sync进行赋值修改 // 或是写到另一个文件里，这里require引入
+});
+global.storage = storage
+
+
+
+
+// 设置本地推送
+import { PushNotificationIOS } from 'react-native'
+var PushNotification = require('react-native-push-notification')
+
+PushNotification.configure({
+
+    // (optional) Called when Token is generated (iOS and Android)
+    onRegister: function (token) {
+        console.log('TOKEN:', token);
+    },
+
+    // (required) Called when a remote or local notification is opened or received
+    onNotification: function (notification) {
+        console.log('NOTIFICATION:', notification);
+
+        // process the notification
+
+        // required on iOS only (see fetchCompletionHandler docs: https://facebook.github.io/react-native/docs/pushnotificationios.html)
+        notification.finish(PushNotificationIOS.FetchResult.NoData);
+    },
+
+    // ANDROID ONLY: GCM or FCM Sender ID (product_number) (optional - not required for local notifications, but is need to receive remote push notifications)
+    senderID: "YOUR GCM (OR FCM) SENDER ID",
+
+    // IOS ONLY (optional): default: all - Permissions to register.
+    permissions: {
+        alert: true,
+        badge: true,
+        sound: true
+    },
+
+    // Should the initial notification be popped automatically
+    // default: true
+    popInitialNotification: true,
+
+    /**
+      * (optional) default: true
+      * - Specified if permissions (ios) and token (android and ios) will requested or not,
+      * - if not, you must call PushNotificationsHandler.requestPermissions() later
+      */
+    requestPermissions: true,
+});
+
+global.pushNotification = PushNotification
 
 export default db

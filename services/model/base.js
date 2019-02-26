@@ -20,4 +20,7 @@ export const exec = async function (sql, values) {
     })
 }
 
+
+
+
 export const nowDateTime = () => { return new Date().toLocaleString('chinese', { hour12: false }) }

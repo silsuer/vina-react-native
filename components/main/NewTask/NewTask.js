@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
-import { StyleSheet, ScrollView, View, KeyboardAvoidingView, DeviceEventEmitter } from 'react-native'
+import { StyleSheet, ScrollView, View, KeyboardAvoidingView, Text } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { Button, List, InputItem, Stepper, DatePicker, Provider, Switch, Modal, Toast, SwipeAction, Picker, TextareaItem } from '@ant-design/react-native'
 import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
 import { RemindTask } from '../../../services/model/remind_task'
+import { TaskStartSvg } from '../../assets/svgs/Common'
+import { TouchableOpacity } from 'react-native-ui-lib';
 
 const styles = StyleSheet.create({
     container: {
@@ -29,8 +31,26 @@ const styles = StyleSheet.create({
 
 class NewTask extends Component {
 
-    static navigationOptions = {
-        title: '提醒'
+    static navigationOptions = ({ navigation }) => {
+        let title = navigation.getParam('id') ? '提醒' : '新建'
+        let headerRight = []
+        if (navigation.getParam('id')) {
+            headerRight.push(
+                <TouchableOpacity key={1} onPress={() => {
+                    // 启动任务，传递参数,当前参数
+                    navigation.navigate('tomatoTimer', { id: navigation.getParam('id') })
+                }}>
+                    <TaskStartSvg style={{ padding: 10 }} color="#3a87f7" width="20" height="20" />
+                </TouchableOpacity>
+            )
+        }
+        return {
+            title: title,
+            headerRight: headerRight,
+            headerRightContainerStyle: {
+                margin: 15,
+            }
+        }
     };
 
     constructor(props) {
@@ -508,7 +528,7 @@ class NewTask extends Component {
                             <List renderHeader='基本'>
                                 <InputItem textAlign="right" value={this.state.title} onChange={(value) => { this.setState({ title: value }) }} placeholder="必填">
                                     任务名
-                   </InputItem>
+                                </InputItem>
                                 <List.Item
                                     extra={
                                         <Stepper key="2" min={0} onChange={this.changeTaskTomatoNumber.bind(this)} value={this.state.tomatoNumber} readOnly={false} />
