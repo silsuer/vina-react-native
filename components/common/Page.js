@@ -1,6 +1,6 @@
 // 这里是每个页面的具体框架
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, Animated, ScrollView, LayoutAnimation, DeviceEventEmitter } from 'react-native'
+import { View, StyleSheet, Animated, ScrollView, LayoutAnimation, AppState } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import Config from '../../configs/app';
 import Header from './Header/Header'
@@ -42,11 +42,18 @@ class Page extends Component {
     }
 
     componentDidMount() {
+        AppState.addEventListener('change', function (nextState) {
+            if (nextState === 'active') {  // 重新进入程序
 
+            }
+            if (nextState === 'inactive') {  // 退出程序
+
+            }
+        })
     }
 
     componentWillUnmount() {
-
+        AppState.removeEventListener('change')
     }
 
     render() {

@@ -37,6 +37,8 @@ class TomatoTimer extends Component {
         }
     }
 
+
+
     // 判断当前番茄钟是否过期
     timerIsExpired(timer) {
         console.log(timer)
@@ -273,6 +275,12 @@ class TomatoTimer extends Component {
         }
     }
 
+
+    // 进行下一个番茄钟，如果不传入id，则是当前任务的下一个番茄钟
+    toNextTomatoTimer() {
+
+    }
+
     // 任务正常倒计时到最后
     taskNormalFinish() {
         // 修改表中数据为正常结束
@@ -286,9 +294,9 @@ class TomatoTimer extends Component {
             })
 
         // 弹出是否休息或者继续进行
-        Alert.alert('完成!', '休息一下吧!', [
+        Alert.alert(this.state.type === 'work' ? '完成!' : '休息时间到!', this.state.type === 'work' ? '休息一下吧!' : '休息好了吗？继续？', [
             {
-                text: '休息一下',
+                text: this.state.type === 'work' ? '休息一下' : '再休息一会儿',
                 onPress: () => {
                     // 改为休息番茄钟
                     this.setState({
@@ -305,22 +313,23 @@ class TomatoTimer extends Component {
                 }
             },
             {
-                text: '不了,继续奋斗!',
+                text: this.state.type === 'work' ? '不了,继续奋斗!' : '继续奋斗！',
                 onPress: () => {
                     // 继续下一个番茄钟
                     this.setState({
                         total: Config.TomatoTimerLength,
                         minute: Config.TomatoTimerLength,
                         seconds: 0,
-                        mode: 'work',
+                        type: 'work',
                         taskOptionsJustifyContent: 'center',
                         pauseButtonStatus: 'pause',
                     }, () => {
-
+                        
                     })
                 }
             }
         ])
+
     }
 
     // 停止任务  force 为true，则不弹出提示，直接停止

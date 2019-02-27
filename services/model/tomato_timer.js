@@ -24,11 +24,13 @@ export class TomatoTimer {
 
     updateToStopTimer(id, f_status) {
         let status = f_status || TomatoTimer.STAUS_NORMAL_STOP  // 默认是正常停止
-        exec(`update ${this.tablename} set final_status=?,end_at=? where id=?`, [status, nowDateTime() , id])
+        exec(`update ${this.tablename} set final_status=?,end_at=? where id=?`, [status, nowDateTime(), id])
 
         // 如果设为了强制停止状态，则撤销本地推送通知
         let p = new PushNotificationRecord()
         p.cancelLocalTomatoNotification(id)
         return true
     }
+
+    // 定义一个定时器，每秒都执行一次
 }
