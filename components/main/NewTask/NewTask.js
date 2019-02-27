@@ -173,7 +173,6 @@ class NewTask extends Component {
                     }
                 }
 
-                console.log(res)
                 this.setState({
                     id: res.id,
                     title: res.title,
@@ -212,7 +211,6 @@ class NewTask extends Component {
     }
     // 更改提醒时间
     changeRemindTime(date) {
-        // console.log(date.getHours())
         this.setState({ remindTime: { hour: date.getHours(), minute: date.getMinutes() }, nowSelectRemindTime: date })
     }
     // 更改提醒方式

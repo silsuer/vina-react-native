@@ -3,6 +3,7 @@ package com.vina_native;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.github.wusuopu.RNIdle.RNIdlePackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.github.alinz.reactnativewebviewbridge.WebViewBridgePackage;
 import com.BV.LinearGradient.LinearGradientPackage;
@@ -28,6 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNIdlePackage(),
             new ReactNativePushNotificationPackage(),
             new WebViewBridgePackage(),
             new LinearGradientPackage(),
