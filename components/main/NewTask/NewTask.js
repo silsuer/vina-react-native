@@ -147,35 +147,8 @@ class NewTask extends Component {
 
     }
 
-    componentWillUnmount() {
-        this.viewDidAppear.remove()
-        this.didBlurSubscription.remove()
-    }
-
     // 挂载方法
     componentDidMount() {
-
-        //========================
-        this.viewDidAppear = this.props.navigation.addListener(
-            'didFocus',
-            (obj) => {
-                storage.load({ key: Config.TomatoTimerLocalStorageKey })
-                    .then((timer) => {
-                        console.log("FootView Timer:", timer)
-                    })
-                // this.refreshState()
-            }
-        )
-
-        this.didBlurSubscription = this.props.navigation.addListener(
-            'didBlur',
-            payload => {
-                this.taskTimer && clearInterval(this.taskTimer)
-            }
-        );
-
-        //======================
-
 
         // 当传入的参数中存在id的时候，去数据库中取出相关数据，并赋值给state
         let id = this.props.navigation.getParam('id', 0)

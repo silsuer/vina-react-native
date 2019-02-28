@@ -48,7 +48,7 @@ class Header extends Component {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-end',
-                backgroundColor: '#1e2941',
+                backgroundColor: this.props.backgroundColor || Config.mainColor,
             },
             main: {
                 display: 'flex',

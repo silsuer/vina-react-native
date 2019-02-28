@@ -6,6 +6,7 @@ import { withNavigation } from 'react-navigation'
 import { CardContainer, CardHeader, CardBody, CardList, CardListItem } from '../../common/CardContainer'
 import { RemindTask } from '../../../services/model/remind_task'
 import { TaskIcon } from '../../assets/svgs/NotesSvg'
+import { DeleteSvg, PigeonholeSvg, TaskStartSvg, TagSvg } from '../../assets/svgs/Common'
 import { convertMinuteToHour, convertTimeToManual } from '../../../services/common_func'
 // 所有（任务/日程/便签）界面
 class All extends Component {
@@ -62,7 +63,7 @@ class All extends Component {
             <CardListItem key={index}
                 swipeLeft={[
                     {
-                        text: '移除',
+                        text: <DeleteSvg />,  // 删除任务
                         style: {
                             backgroundColor: 'red',
                             color: 'white',
@@ -70,7 +71,7 @@ class All extends Component {
                         onPress: () => console.log("移除")
                     },
                     {
-                        text: '归档',
+                        text: <PigeonholeSvg width="19" height="19" />,  // 归档
                         style: {
                             backgroundColor: '#eab646',
                             color: 'white',
@@ -80,15 +81,17 @@ class All extends Component {
                 ]}
                 swipeRight={[
                     {
-                        text: '开始',
+                        text: <TaskStartSvg width="22" height="22" />,
                         style: {
                             backgroundColor: '#007bff',
                             color: 'white',
                         },
-                        onPress: () => console.log("开始")
+                        onPress: () => {
+                            this.props.navigation.navigate('tomatoTimer', { id: data.id })
+                        }
                     },
                     {
-                        text: '标记为已完成',
+                        text: <TagSvg />,
                         style: {
                             backgroundColor: '#28a745',
                             color: 'white',

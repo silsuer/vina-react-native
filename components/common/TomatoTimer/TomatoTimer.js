@@ -130,66 +130,6 @@ class TomatoTimer extends Component {
                     }
                 }
             })
-
-        // 把当前番茄钟设置为传来的任务番茄钟
-        // const mountTask = () => {
-        //     const navigation = this.props.navigation
-        //     let r = new RemindTask()
-        //     r.findOne(navigation.getParam('id')).then((res) => {
-        //         // 取出这是第几个番茄钟
-        //         // 设置title
-        //         this.setState({ title: res.title, showGoBackButton: true })
-        //     })
-        // }
-        // 如果当前存在正在执行的任务，则显示当前任务，否则显示临时番茄钟
-        // storage.load({ key: Config.TomatoTimerLocalStorageKey })
-        //     .then((timer) => {
-        //         const navigation = this.props.navigation
-        //         // 判断当前番茄钟是否过期
-        //         if ((!timer) || (this.timerIsExpired(timer) === true)) {  // 番茄钟过期或不存在，继续往下走
-        //             if (navigation.getParam('id')) {// 如果传来了id
-        //                 mountTask()
-        //             }
-        //         } else {
-        //             if (navigation.getParam('id')) {  // 如果传来了id，而且当前番茄钟没过期，那么就要弹出提示
-        //                 Alert.alert('存在正在运行的番茄钟', '确认要强制停止吗?', [
-        //                     {
-        //                         text: '取消',
-        //                         onPress: () => {
-        //                             navigation.goBack()  // 返回
-        //                         }
-        //                     }, {
-        //                         text: '强制停止',
-        //                         onPress: () => {
-        //                             // 停止当前番茄钟
-        //                             this.stopTask(true)
-        //                             mountTask()
-        //                         }
-        //                     }
-        //                 ])
-
-        //             } else {
-        //                 const getPauseButtonStatus = () => {
-        //                     switch (timer.current_status) {
-        //                         case T.STATUS_RUNNING:
-        //                             return 'pause'
-        //                         case T.STATUS_PAUSE:
-        //                             return 'start'
-        //                     }
-        //                 }
-        //                 // 根据需要，重新调整timer (根据现在和上次操作时间的时间差计算minute和seconds) 并设置state
-        //                 console.log(timer);
-        //                 timer = this.timerIsExpired(timer)
-        //                 this.setState({
-        //                     taskOptionsJustifyContent: 'space-between',
-        //                     pauseButtonStatus: getPauseButtonStatus(),
-        //                     total: Config.TomatoTimerLength,
-        //                     minute: timer.minute,
-        //                     seconds: timer.seconds,
-        //                 })
-        //             }
-        //         }
-        //     })
     }
 
 
@@ -268,24 +208,9 @@ class TomatoTimer extends Component {
 
     }
 
-    refreshTimerLocalStorage() {
-        // storage.load({ key: Config.TomatoTimerLocalStorageKey })
-        //     .then((timer) => {
-        //         // 如果是停止后退出，则不变
-        //         if (timer) {
-        //             timer.minute = this.state.minute
-        //             timer.seconds = this.state.seconds
-        //             timer.last_action_time = new Date(Date.now())
-        //         }
-        //     })
-    }
+   
 
     goBack() {
-        // 返回之前先把当前数据入库
-        storage.load({ key: Config.TomatoTimerLocalStorageKey })
-            .then((timer) => {
-                console.log("返回", timer)
-            })
         this.taskTimer && clearInterval(this.taskTimer)  // 清除定时器
         this.props.navigation.goBack()
     }
@@ -426,7 +351,13 @@ class TomatoTimer extends Component {
                     storage.save({ key: Config.TomatoTimerLocalStorageKey, data: null })
                     this.taskTimer && clearInterval(this.taskTimer) // 清除定时器
                     // 定时器回归原状
-                    this.setState({ total: Config.TomatoTimerLength, minute: Config.TomatoTimerLength, seconds: 0, taskOptionsJustifyContent: 'center' })
+                    this.setState({
+                        total: Config.TomatoTimerLength,
+                        minute: Config.TomatoTimerLength,
+                        seconds: 0,
+                        taskOptionsJustifyContent: 'center',
+                        type:'work'  // 不论是否是休息钟，结束后都回归工作钟
+                    })
                 })
         }
 

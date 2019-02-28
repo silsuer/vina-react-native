@@ -7,37 +7,16 @@
  * @lint-ignore-every XPLATJSCOPYRIGHT1
  */
 
-import React, { Component } from 'react';
-import { ScrollView, Dimensions, View } from 'react-native';
-import { createStackNavigator, createAppContainer, createDrawerNavigator, SafeAreaView, DrawerItems } from 'react-navigation'
-import LinearGradient from 'react-native-linear-gradient'
+import React from 'react';
+import { createStackNavigator, createAppContainer, createDrawerNavigator } from 'react-navigation'
 import NewTask from './components/main/NewTask/NewTask'
 import { NotesSvg } from './components/assets/svgs/NotesSvg';
-import { SlideAvatar, PassowrdBoxSvg, CloudStorageSvg, SettingSvg } from './components/common/SlideIcons'
 import NotesMainApp from './components/main/NotesMainApp';
 import NewNote from './components/main/NotesApp/New/NewNote'
 import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
-const mainWindow = Dimensions.get('window')
-const windowWidth = mainWindow.width
-const windowHeight = mainWindow.height
+import DrawerContentComponent from './components/common/Drawer'  // 侧边栏
 
 import './services/init'
-
-const CustomDrawerContentComponent = (props) => (
-  <LinearGradient locations={[0.2, 1]} colors={['#1e2941', '#8d7f82']} >
-    <ScrollView>
-
-      <SafeAreaView style={{ height: windowHeight }} forceInset={{ top: 'always', horizontal: 'never' }}>
-        <View style={{ margin: 10 }}>
-          <SlideAvatar />
-        </View>
-        <DrawerItems  {...props} />
-      </SafeAreaView>
-    </ScrollView>
-  </LinearGradient>
-);
-
-
 
 const AppDrawerNavigator = createDrawerNavigator({
   Notes: {
@@ -88,7 +67,7 @@ const AppDrawerNavigator = createDrawerNavigator({
   //   }
   // },
 }, {
-    contentComponent: CustomDrawerContentComponent,
+    contentComponent: DrawerContentComponent,
     drawerType: 'slide',
     contentOptions: {
       activeTintColor: '#f5f5f5',
