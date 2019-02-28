@@ -79,17 +79,15 @@ class HomeButton extends Component {
             //  在App.js中，这个view应该是浮动在整个页面上面的
             <View
                 style={styles.position}
-                // {...this._panResponder.panHandlers}
+            // {...this._panResponder.panHandlers}
             >
-
-
                 <ButtonRadius
                     onPress={this.homeButtonOnPress.bind(this)}
                     style={styles.button}
                     diameter={55}
                     color={this.props.backgroundColor}
-                    icon={<BottomNavigation />}
-                // title="导航"
+                    icon={this.props.icon ? this.props.icon : <BottomNavigation />}
+                    title={this.props.title ? this.props.title : ''}
                 />
             </View>
         )

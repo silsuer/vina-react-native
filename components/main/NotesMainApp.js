@@ -43,7 +43,7 @@ export default class NotesMainApp extends Component {
             'notes-all': {
                 title: '全部',
                 headerLeft: [
-                    <MenuIcon width="25" height="25" onPress={() => { this.props.navigation.openDrawer() }} /> ,
+                    <MenuIcon width="25" height="25" onPress={() => { this.props.navigation.openDrawer() }} />,
                 ],
                 headerRight: [
                     <PigeonholeSvg width="15" height="15" />,
@@ -139,6 +139,9 @@ export default class NotesMainApp extends Component {
                         break
                     case 'notes-new-task':
                         this.props.navigation.navigate('newRemindTask')
+                        break
+                    case 'notes-navigate-to-tomato-timer':
+                        this.props.navigation.navigate('tomatoTimer')
                         break
                 }
             }

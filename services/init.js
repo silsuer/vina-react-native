@@ -156,7 +156,7 @@ PushNotification.configure({
 
     // (required) Called when a remote or local notification is opened or received
     onNotification: function (notification) {
-        console.log('NOTIFICATION:', notification);
+        // console.log('NOTIFICATION:', notification);
 
         // process the notification
 
@@ -187,5 +187,9 @@ PushNotification.configure({
 });
 
 global.pushNotification = PushNotification
+
+global.log = (str) => {
+    console.log(str)
+}
 
 export default db

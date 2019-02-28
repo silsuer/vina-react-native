@@ -23,6 +23,10 @@ class BottomTabBar extends Component {
             currentIconIndex: this.props.mode === "common" ? -1 : 0,  // 当前选中的tab的索引
         }
 
+        this.refreshAnimated(props)
+    }
+
+    refreshAnimated(props) {
         this.perWidthAnimatedOpen = Animated.timing(
             this.state.perWidth,
             {
@@ -36,7 +40,7 @@ class BottomTabBar extends Component {
         this.containerWidthAnimatedOpen = Animated.timing(
             this.state.containerWidth,
             {
-                toValue: this.props.mode === "common" ? this.props.options.length * configWidth : (this.props.options.length + 1) * configWidth,
+                toValue: this.props.mode === "common" ? props.options.length * configWidth : (props.options.length + 1) * configWidth,
                 duration: 100,
                 easing: Easing.linear
             }
@@ -97,6 +101,13 @@ class BottomTabBar extends Component {
             }
         )
 
+        if (this.state.status === 'open') {
+            this.openTabBar()
+        }
+    }
+
+    componentWillReceiveProps(props) {
+        this.refreshAnimated(props)
     }
 
     componentDidMount() {
