@@ -1,18 +1,23 @@
 import React, { Component } from 'react'
-import { StyleSheet, ScrollView, View, KeyboardAvoidingView, Text } from 'react-native'
+import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { Button, List, InputItem, Stepper, DatePicker, Provider, Switch, Modal, Toast, SwipeAction, Picker, TextareaItem } from '@ant-design/react-native'
 import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
 import { RemindTask } from '../../../services/model/remind_task'
-import { TaskStartSvg } from '../../assets/svgs/Common'
-import { TouchableOpacity } from 'react-native-ui-lib';
+import { TaskStartSvg, CloseSvg, DetermineSvg } from '../../assets/svgs/Common'
 import Page from '../../common/Page'
+import { CardContainer, CardHeader, CardBody, CardList, CardListItem } from '../../common/CardContainer'
+
+const mainWindow = Dimensions.get('window')
+const windowWidth = mainWindow.width
+const windowHeight = mainWindow.height
+
 const styles = StyleSheet.create({
     container: {
-
         backgroundColor: '#f5f5f5',
-        display: 'flex',
-        flex: 1,
+        height: windowHeight,
+        borderRadius: 5,
+
     },
     inputItem: {
         backgroundColor: '#f5f5f5',
@@ -26,6 +31,8 @@ const styles = StyleSheet.create({
     taskComment: {
         padding: 50,
         marginTop: 0,
+        fontSize: 15,
+        color: '#00000099'
     }
 })
 
@@ -46,6 +53,7 @@ class NewTask extends Component {
         }
         return {
             title: title,
+            header: null,
             headerRight: headerRight,
             headerRightContainerStyle: {
                 margin: 15,
@@ -82,7 +90,7 @@ class NewTask extends Component {
         }
 
         // 返回每个月的选择options
-        const getEveryMonthArray = () => {
+        this.getEveryMonthArray = () => {
             let arr = [];
             for (let i = 1; i <= 31; i++) {
                 arr.push({
@@ -140,7 +148,7 @@ class NewTask extends Component {
             {
                 value: 'everymonth',
                 label: '精确到月',
-                children: getEveryMonthArray()
+                children: this.getEveryMonthArray()
             },
         ]
 
@@ -241,7 +249,11 @@ class NewTask extends Component {
         if (this.state.remindModeNotice) {
             stack.push('通知')
         }
-        return stack.join(',')
+        return (
+            <View>
+                <Text style={{ fontSize: 15, color: '#00000099' }}> {stack.join(',')} </Text>
+            </View>
+        )
     }
 
     // 生成子任务视图
@@ -284,7 +296,9 @@ class NewTask extends Component {
                         },
                     ]}
                 >
-                    <List.Item extra={<TomatoSvg number={data.tomatoNumber} width="25" height="25"></TomatoSvg>} >{data.title}</List.Item>
+                    <List.Item extra={<TomatoSvg number={data.tomatoNumber} width="25" height="25"></TomatoSvg>} >
+                        <Text>{data.title}</Text>
+                    </List.Item>
                 </SwipeAction>
             )
         })
@@ -298,6 +312,36 @@ class NewTask extends Component {
     }
     // 生成重复项的部分
     generateRepeatRender() {
+
+        const getValueFromRepeatArray = (key, arr) => {
+            for (let i = 0; i < arr.length; i++) {
+                if (arr[i].value === key) {
+                    return arr[i].label
+                }
+                if (arr[i].children && arr[i].children.length > 0) {
+                    let r = getValueFromRepeatArray(key, arr[i].value === 'everymonth' ? this.getEveryMonthArray() : arr[i].children)
+                    if (r === false) {
+                        continue
+                    } else {
+                        return r
+                    }
+                }
+            }
+            return false
+        }
+
+        const getValueFromKey = (option) => {
+            let values = []
+            for (let i = 0; i < option.length; i++) {
+                if (getValueFromRepeatArray(option[i], this.repeatListOptions)) {
+                    values.push(getValueFromRepeatArray(option[i], this.repeatListOptions))
+                }
+            }
+            return (
+                <Text style={{ fontSize: 15, color: "#00000099" }}>{values.join(',')}</Text>
+            )
+        }
+
         return this.state.repeatData.map((option, index) => {
             const title = "重复" + (index === 0 ? '' : index)
             return (
@@ -321,10 +365,13 @@ class NewTask extends Component {
                     <Picker
                         data={this.repeatListOptions}
                         onOk={this.saveRepeat.bind(this, index)}
-                        value={option}
+                        itemStyle={{ fontSize: 18 }}
+                        extra={getValueFromKey(option)}
                     >
                         <List.Item
-                            arrow="horizontal">{title}</List.Item>
+                            arrow="horizontal">
+                            <Text> {title}</Text>
+                        </List.Item>
                     </Picker>
                 </SwipeAction>)
         })
@@ -515,28 +562,61 @@ class NewTask extends Component {
 
     }
 
+
     render() {
-        return (
-            <Provider>
-                <KeyboardAvoidingView behavior="padding" enabled>
-                    <ScrollView >
+
+        const getDatePickerExtra = () => {
+            return (
+                <View>
+                    <Text style={{ fontSize: 15, color: '#00000099' }}>{this.state.nowSelectRemindTime ? this.state.nowSelectRemindTime.format("h:m") : "无"} </Text>
+                </View>
+            )
+        }
+
+        const getBody = () => {
+
+            const getExtra = () => {
+                let init = []
+                init.push(<TouchableOpacity onPress={() => {
+                    if (this.state.saveButtonDisabled) {
+
+                    } else {
+                        this.saveTask()
+                    }
+                }}>
+                    <DetermineSvg color="#1e294199" width="17" height="17" />
+                </TouchableOpacity>)
+                if (this.props.navigation.getParam('id')) { // 修改
+                    init.push(<TouchableOpacity onPress={() => { this.props.navigation.navigate('tomatoTimer', { id: this.props.navigation.getParam('id') }) }}>
+                        <TaskStartSvg color="#1e294199" width="17" height="17" />
+                    </TouchableOpacity>)
+                }
+                return init
+            }
+
+            return (
+
+                <CardContainer>
+                    <CardHeader
+                        icon={<TouchableOpacity onPress={() => { this.props.navigation.goBack() }}>
+                            <CloseSvg color="#1e294199" width="17" height="17" />
+                        </TouchableOpacity>}
+                        title={this.props.navigation.getParam('id') ? '提醒' : '新建'}
+                        extra={getExtra()}
+                    />
+                    <CardBody>
                         <View style={styles.container}>
-                            <View style={styles.header}>
-                                {/* <Header title="新建" /> */}
-                            </View>
-                            <List renderHeader='基本'>
-                                <InputItem textAlign="right" value={this.state.title} onChange={(value) => { this.setState({ title: value }) }} placeholder="必填">
-                                    任务名
+                            <List renderHeader=''>
+                                <InputItem textAlign="right" value={this.state.title} style={{ fontSize: 15, color: '#00000099' }} onChange={(value) => { this.setState({ title: value }) }} placeholder="必填">
+                                    <Text>名称</Text>
                                 </InputItem>
                                 <List.Item
                                     extra={
-                                        <Stepper key="2" min={0} onChange={this.changeTaskTomatoNumber.bind(this)} value={this.state.tomatoNumber} readOnly={false} />
+                                        <Stepper inputStyle={{ fontSize: 15, color: '#00000099' }} key="2" min={0} onChange={this.changeTaskTomatoNumber.bind(this)} value={this.state.tomatoNumber} readOnly={false} />
                                     }
                                 >
-                                    番茄数
-                   </List.Item>
-
-
+                                    <Text>番茄数</Text>
+                                </List.Item>
                                 <SwipeAction
                                     autoClose
                                     right={[
@@ -550,21 +630,23 @@ class NewTask extends Component {
                                     <DatePicker
                                         title="提醒时间"
                                         mode="time"
-                                        value={this.state.nowSelectRemindTime}
-                                        extra={this.state.nowSelectRemindTime ? this.state.nowSelectRemindTime : "无"}
+                                        extra={getDatePickerExtra()}
                                         onChange={this.changeRemindTime.bind(this)}
                                     >
-                                        <List.Item arrow="horizontal">提醒时间</List.Item>
+                                        <List.Item textAlign="center" arrow="horizontal">
+                                            <Text>提醒时间</Text>
+                                        </List.Item>
                                     </DatePicker>
                                 </SwipeAction>
 
 
                                 <List.Item
+                                    textAlign="center"
                                     extra={this.getRemindModesString(this)}
                                     arrow="horizontal"
                                     onPress={this.clickRemindMode.bind(this)}>
-                                    提醒方式
-                            </List.Item>
+                                    <Text>提醒方式</Text>
+                                </List.Item>
                             </List>
 
                             <List renderHeader="重复">
@@ -586,60 +668,62 @@ class NewTask extends Component {
                                     {this.state.taskComment}
                                 </TextareaItem>
                             </List>
-
-
-                            <Button
-                                type="primary"
-                                style={{ marginTop: 30 }}
-                                onPress={this.saveTask.bind(this)}
-                                disabled={this.state.saveButtonDisabled}
-                            >保存</Button>
-
                         </View>
+                    </CardBody>
+                    {/* 提醒方式模态框 */}
+                    <Modal
+                        popup
+                        visible={this.state.remindModeVisiable}
+                        closable
+                        maskClosable
+                        animationType="slide-up"
+                        onClose={() => { this.closeRemindModeModal() }}
+                    >
+                        <List renderHeader="提醒方式">
+                            <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'bell')} checked={this.state.remindModeBell} />}>响铃</List.Item>
+                            <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'shock')} checked={this.state.remindModeShock} />}>震动</List.Item>
+                            <List.Item style={{ marginBottom: 10 }} extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'notice')} checked={this.state.remindModeNotice} />}>通知</List.Item>
+                        </List>
+                    </Modal>
 
-                        {/* 提醒方式模态框 */}
-                        <Modal
-                            popup
-                            visible={this.state.remindModeVisiable}
-                            closable
-                            maskClosable
-                            animationType="slide-up"
-                            onClose={() => { this.closeRemindModeModal() }}
-                        >
-                            <List renderHeader="提醒方式">
-                                <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'bell')} checked={this.state.remindModeBell} />}>响铃</List.Item>
-                                <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'shock')} checked={this.state.remindModeShock} />}>震动</List.Item>
-                                <List.Item style={{ marginBottom: 10 }} extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'notice')} checked={this.state.remindModeNotice} />}>通知</List.Item>
-                            </List>
-                        </Modal>
+                    <Modal
+                        title="新建子任务"
+                        transparent
+                        maskClosable
+                        visible={this.state.subTaskModeVisiable}
+                        footer={[
+                            { text: '取消', onPress: this.cancelCreateSubTaskModal.bind(this) },
+                            { text: '保存', onPress: this.saveSubTask.bind(this) },
+                        ]}
+                    >
+                        <List style={{ marginTop: 10 }}>
+                            <InputItem textAlign="right" placeholder="必填" onChange={this.changeTmpSubTaskTitle.bind(this)} value={this.state.tmpSubTaskData.title}>
+                                任务名
+                              </InputItem>
+                            <List.Item
+                                extra={
+                                    <Stepper key="2" min={0} onChange={this.changeTmpSubTaskTomatoNumber.bind(this)} value={this.state.tmpSubTaskData.tomatoNumber} readOnly={false} />
+                                }
+                            >
+                                番茄数
+                            </List.Item>
+                        </List>
+                    </Modal>
+                </CardContainer>
+            )
+        }
 
-                        <Modal
-                            title="新建子任务"
-                            transparent
-                            maskClosable
-                            visible={this.state.subTaskModeVisiable}
-                            footer={[
-                                { text: '取消', onPress: this.cancelCreateSubTaskModal.bind(this) },
-                                { text: '保存', onPress: this.saveSubTask.bind(this) },
-                            ]}
-                        >
-                            <List style={{ marginTop: 10 }}>
-                                <InputItem textAlign="right" placeholder="必填" onChange={this.changeTmpSubTaskTitle.bind(this)} value={this.state.tmpSubTaskData.title}>
-                                    任务名
-                                </InputItem>
-                                <List.Item
-                                    extra={
-                                        <Stepper key="2" min={0} onChange={this.changeTmpSubTaskTomatoNumber.bind(this)} value={this.state.tmpSubTaskData.tomatoNumber} readOnly={false} />
-                                    }
-                                >
-                                    番茄数
-                              </List.Item>
-                            </List>
-                        </Modal>
+        return (
+            <Provider>
+                <Page
 
+                    title={false}
+                    left={[]}
+                    right={[]}
+                    tabBarOptions={[]}
+                    body={getBody()}
+                />
 
-                    </ScrollView>
-                </KeyboardAvoidingView>
             </Provider>
 
 

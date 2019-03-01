@@ -5,7 +5,7 @@ import Page from '../common/Page'
 import { MenuIcon } from '../common/SlideIcons'
 import { PigeonholeSvg, FilterSvg, SearchSvg, NewNoteSvg, NoteSvg, ScheduleSvg, AccountRecordSvg, AnniversarySvg, CountdownSvg } from '../assets/svgs/Common'
 import { TaskIcon } from '../assets/svgs/NotesSvg'
-import { IndexSvg, TaskTabBarSvg, StatisticsBarSvg, MineBarSvg } from '../assets/svgs/TabBarIconSvg'
+import { IndexSvg, TaskTabBarSvg, StatisticsBarSvg } from '../assets/svgs/TabBarIconSvg'
 import { Modal, Provider } from '@ant-design/react-native'
 import BottomTabBar from '../common/TabBar/BottomTabBar'
 import Statistics from './NotesApp/Statistics';
@@ -177,12 +177,12 @@ export default class NotesMainApp extends Component {
                     right={this.state.headerRight}
                     tabBarOptions={[
                         {
-                            icon: <IndexSvg width="20" height="20" />,
+                            icon: <IndexSvg width="23" height="20" />,
                             label: '最近',
                             name: 'notes-home'
                         },
                         {
-                            icon: <TaskTabBarSvg width="20" height="20" />,
+                            icon: <TaskTabBarSvg width="30" height="25" />,
                             label: '全部',
                             name: 'notes-all'
                         },

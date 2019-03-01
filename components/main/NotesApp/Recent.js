@@ -9,7 +9,6 @@ import { TaskIcon } from '../../assets/svgs/NotesSvg'
 export default class RecentView extends Component {
     render() {
         return (
-            <View>
                 <CardContainer>
                     {/* title 是名称 icon是图标 extra是右侧的按钮 */}
                     <CardHeader title="今日任务" icon={<TaskIcon width="20" height="20" color="blue" />} extra={[<TaskIcon width="20" height="20" color="blue" />]} />
@@ -34,7 +33,6 @@ export default class RecentView extends Component {
                         </CardList>
                     </CardBody>
                 </CardContainer>
-            </View>
         )
     }
 }

@@ -1,6 +1,6 @@
 // 这里是每个页面的具体框架
 import React, { Component } from 'react'
-import { View, StyleSheet, Animated, ScrollView, LayoutAnimation, AppState, DeviceEventEmitter } from 'react-native'
+import { View, StyleSheet, Animated, ScrollView, LayoutAnimation, AppState, DeviceEventEmitter,KeyboardAvoidingView } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { withNavigation } from 'react-navigation'
 import Config from '../../configs/app';
@@ -105,7 +105,7 @@ class Page extends Component {
                         }
                     }
                     // 添加一个直达的option
-                    if (this.state.tabBarOptions[this.state.tabBarOptions.length - 1].name !== 'notes-navigate-to-tomato-timer') {
+                    if (this.state.tabBarOptions.length > 0 && this.state.tabBarOptions[this.state.tabBarOptions.length - 1].name !== 'notes-navigate-to-tomato-timer') {
                         let list = this.state.tabBarOptions
                         list.push({
                             icon: <TomatoTarBarSvg width="20" height="20" />,
@@ -120,7 +120,7 @@ class Page extends Component {
 
                 } else {
                     // 判断是否有番茄钟option，如果有，则删除
-                    if (this.state.tabBarOptions[this.state.tabBarOptions.length - 1].name === 'notes-navigate-to-tomato-timer') {
+                    if (this.state.tabBarOptions.length > 0 && this.state.tabBarOptions[this.state.tabBarOptions.length - 1].name === 'notes-navigate-to-tomato-timer') {
                         let list = []
                         for (let i = 0; i < this.state.tabBarOptions.length; i++) {
                             if (i >= this.state.tabBarOptions.length - 1) {
@@ -264,6 +264,7 @@ class Page extends Component {
             body: {
                 flex: 6,
                 marginTop: 10,
+                alignItems:'center'
             },
             footer: {
                 position: 'absolute',
@@ -293,7 +294,6 @@ class Page extends Component {
         }
 
         const getMainBackgroundColor = () => {
-            LayoutAnimation.easeInEaseOut()
             let colors = [Config.mainColor, Config.finishColor]
             switch (this.state.mode) {
                 case 'work':
@@ -330,8 +330,11 @@ class Page extends Component {
             }
         }
 
-        return (
-            <LinearGradient locations={[0.2, 1]} colors={getMainBackgroundColor()} style={styles.container} >
+        const getHeader = () => {
+            if (this.props.title === false) {
+                return <View style={{ height: 30 }}></View>
+            }
+            return (
                 <View style={styles.header}>
                     <Header
                         backgroundColor={getHeaderBackgroundColor()}
@@ -341,11 +344,19 @@ class Page extends Component {
                         right={this.props.right}
                         avatar={require('../assets/images/default_avatar.jpg')} />
                 </View>
-                <ScrollView>
+            )
+        }
+
+        return (
+            <LinearGradient locations={[0.2, 1]} colors={getMainBackgroundColor()} style={styles.container} >
+                <KeyboardAvoidingView  behavior="padding" enabled>
+                {getHeader()}
+                <ScrollView showsVerticalScrollIndicator={false}>
                     <Animated.View opacity={this.state.opacity} style={styles.body}>
                         {this.state.currentBody}
                     </Animated.View>
                 </ScrollView>
+                </KeyboardAvoidingView>
                 <FooterView tabBarColor={getHeaderBackgroundColor()} buttonIcon={getButtonIcon()} tabBarOptions={this.state.tabBarOptions} title={getTitleString()} />
 
                 {/* 留存dropList的所有 */}

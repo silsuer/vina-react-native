@@ -206,12 +206,12 @@ class BottomTabBar extends Component {
                             position: 'relative',
                         }}>
                         {option.icon}
-                        <Text style={{
+                        {/* <Text style={{
                             fontSize: 8,
                             marginTop: 3,
                             color: this.props.color ? this.props.color : 'white',
                             // display: 'none'
-                        }}>{option.label}</Text>
+                        }}>{option.label}</Text> */}
                     </Animated.View>
                     {(index === this.props.options.length - 1 && this.props.mode !== "common") ? <Animated.View style={{ width: this.state.rightFillViewWidth }}></Animated.View> : <View></View>}
                 </TouchableOpacity>
