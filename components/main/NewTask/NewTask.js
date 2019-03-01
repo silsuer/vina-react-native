@@ -6,7 +6,7 @@ import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
 import { RemindTask } from '../../../services/model/remind_task'
 import { TaskStartSvg } from '../../assets/svgs/Common'
 import { TouchableOpacity } from 'react-native-ui-lib';
-
+import Page from '../../common/Page'
 const styles = StyleSheet.create({
     container: {
 
