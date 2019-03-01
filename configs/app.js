@@ -7,6 +7,10 @@ class Config {
     static cardContainerWidthPercent = 0.95  // CardContainer组件占用整个屏幕宽度得百分比
     static PageHeaderHeight = 90  // Page组件中的Header所占得高度
     static TomatoTimerLocalStorageKey = 'tomato-timer-local-storage-key'  // 记录正在执行的番茄钟的localstorage的key
+
+    static StartIntervalTagKey = 'start-interval-tag-key'  // 标记当前是否有正在运行的定时器key
+    static StartIntervalTagValue = 1  // 标记当前是否有正在运行的定时器的value
+    
     static TomatoTimerLength = 1  // 番茄钟时长（分钟）
     static RestTomatoTimerLength = 1  // 休息番茄钟时长
 

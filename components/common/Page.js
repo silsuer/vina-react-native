@@ -64,6 +64,10 @@ class Page extends Component {
         }
         storage.load({ key: Config.TomatoTimerLocalStorageKey })
             .then((timer) => {
+                if (timer === null) {
+                    this.clearTimer()
+                }
+                console.log("page timer:", timer.seconds, timer.minute)
                 if (timer.minute === 0 && timer.seconds === 0) {  //   任务完成,入库
                     // TODO  入库逻辑
                     this.taskTimer && clearInterval(this.taskTimer) // 停止计时
@@ -93,11 +97,11 @@ class Page extends Component {
                     // 如果timer存在，不论是否过期，都应该显示出来
                     //TODO 根据timer的mode，设置颜色
                     if (this.timerIsExpired(timer) === true) { // 过期，显示 00:00
-
+                        this.setState({ minute: 0, seconds: 0 })
                     } else {
                         // 未过期，启动定时器,每秒执行一次，并重新入库
                         if (timer.current_status == TomatoTimer.STATUS_RUNNING) {
-                            this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
+                            this.startInterval()
                         }
                     }
                     // 添加一个直达的option
@@ -160,29 +164,80 @@ class Page extends Component {
     }
 
 
+    // 开启定时器
+    startInterval() {
+        storage.load({ key: Config.StartIntervalTagKey })
+            .then((k) => {
+                if (k === Config.StartIntervalTagValue) { // 存在定时器
+                    // this.clearTimer()
+                } else {
+                    storage.save({ key: Config.StartIntervalTagKey, data: Config.StartIntervalTagValue })
+                        .then(() => {
+                            this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
+                        })
+                }
+            }).catch((err) => {
+                if (err.name === 'NotFoundError') {  // 没找到数据
+                    storage.save({ key: Config.StartIntervalTagKey, data: Config.StartIntervalTagValue })
+                        .then(() => {
+                            this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
+                        })
+                }
+            })
+    }
+
+    clearTimer() {
+        storage.save({ key: Config.StartIntervalTagKey, data: null })
+            .then(() => {
+                this.taskTimer && clearInterval(this.taskTimer)
+            })
+    }
+
     componentDidMount() {
 
+        // this.pageClearTimerListener = DeviceEventEmitter.addListener("page-clear-timer", () => {
+        //     this.clearTimer()
+        // })
+        const refreshState = () => {
+            return this.refreshState()
+        }
+
+        const clearTimer = () => {
+            this.clearTimer()
+        }
+
         this.viewDidAppear = this.props.navigation.addListener(
-            'didFocus',
+            'willFocus',
             (obj) => {
-                this.refreshState()
+                console.log("焦点定时器")
+                refreshState()
             }
         )
 
         this.didBlurSubscription = this.props.navigation.addListener(
-            'didBlur',
+            'willBlur',
             payload => {
-                this.taskTimer && clearInterval(this.taskTimer)
+                console.log("移除定时器")
+                clearTimer()
             }
         );
 
 
+        const nowPageIsFocused = () => {
+            return this.props.navigation.isFocused()
+        }
+
         AppState.addEventListener('change', function (nextState) {
             if (nextState === 'active') {  // 重新进入程序
+                // 重新开启定时器
+                if (nowPageIsFocused()) {
+                    refreshState()
+                }
 
             }
             if (nextState === 'inactive') {  // 退出程序
-
+                // 取消定时器
+                clearTimer()
             }
         })
     }
@@ -192,6 +247,8 @@ class Page extends Component {
 
         this.viewDidAppear.remove()
         this.didBlurSubscription.remove()
+        // this.pageClearTimerListener.remove()
+        this.clearTimer()
     }
 
     render() {

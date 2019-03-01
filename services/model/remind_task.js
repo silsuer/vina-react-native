@@ -1,5 +1,7 @@
-import { nowDateTime, exec } from './base'
+import { nowDateTime, exec, getTodayDateTime, getTomorrowDateTime } from './base'
 import { Post } from './posts'
+import { TomatoTimer } from './tomato_timer'
+
 // 任务模型，创建存储
 export class RemindTask {
     constructor() {
@@ -238,6 +240,30 @@ export class RemindTask {
             result.subTaskData = []
         }
 
+        // 获取今天已经完成了几个番茄
+        let selectTodayTaskCountSql = `select count(*) as c from tomato_timer 
+                                       where mode=? 
+                                       and
+                                       relation_task_id=?
+                                       and
+                                       final_status=?
+                                       and 
+                                       start_at > ?
+                                       and
+                                       start_at < ? `
+
+     
+        let todayTaskCount = await exec(selectTodayTaskCountSql, [
+            'work',
+            result.id,
+            TomatoTimer.STAUS_NORMAL_STOP,
+            getTodayDateTime(),
+            getTomorrowDateTime()
+        ]).catch((err) => {
+            console.log(`获取id为${result.id}的任务的今日完成番茄数失败:`, err)
+        })
+
+        result.current_finish_tomato_number = todayTaskCount.result.rows.item(0).c
         // 遍历子任务
         for (let i = 0; i < subRes.result.rows.length; i++) {
             let row = subRes.result.rows.item(i)

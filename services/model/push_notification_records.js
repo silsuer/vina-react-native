@@ -44,9 +44,21 @@ export class PushNotificationRecord {
         if (res.result.rows.length > 0) {
             // 获取第一行
             let row = res.result.rows.item(0)
-            pushNotification.cancelLocalNotifications({ id: row.id })
+            console.log("正在取消本地推送:", row)
+            // 取消后删除这一行
+            this.deleteNotificationRecord(row.id)
+                .then((res) => {
+                    pushNotification.cancelLocalNotifications({ id: row.id })
+                })
+
         } else {
             return
         }
+    }
+
+
+    async deleteNotificationRecord(id) {
+        let res = await exec(`update ${this.tableName} set is_deleted=? where id=?`, [PushNotificationRecord.IS_DELETED, id])
+        return res
     }
 }

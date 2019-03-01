@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Dimensions, View, Text, StyleSheet, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { Dimensions, View, Text, StyleSheet, TouchableOpacity, Alert, TextInput, AppState, DeviceEventEmitter } from 'react-native';
 import { withNavigation } from 'react-navigation'
 import TimerCircularProgress from '../../main/TimerCircularProgress/TimerCircularProgress'
 import TaskTimerStartSvg from '../../assets/svgs/TaskTimerStartSvg/TaskTimerStartSvg'
@@ -12,6 +12,7 @@ import { TomatoTimer as T } from '../../../services/model/tomato_timer'
 import { PushNotificationRecord } from '../../../services/model/push_notification_records'
 import Config from '../../../configs/app'
 import { nowDateTime } from '../../../services/model/base';
+import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
 import RNIdle from 'react-native-idle'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
@@ -32,6 +33,7 @@ class TomatoTimer extends Component {
             title: '番茄钟',
             showGoBackButton: false,   // 是否显示返回按钮
             headerRight: null,
+            showHeaderRight: false,  // 不显示headerRight
         }
     }
 
@@ -62,15 +64,46 @@ class TomatoTimer extends Component {
     setCurrentTomatoTimer(id) {
         let t = new RemindTask()
         t.findOne(id).then((res) => {
-            this.setState({ title: res.title })
+            // 根据传来的数据设置 headerRight
+            let right = null
+            let showRight = false
+            if (res.current_finish_tomato_number !== undefined && res.tomato_number !== 0) { // 如果存在
+                showRight = true
+                right = (
+                    <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: "center" }}>
+                        <Text style={{ color: '#ffffff99' }}>{(res.current_finish_tomato_number + 1) + '/' + res.tomato_number}</Text>
+                        {/* <TomatoSvg color="#ffffff99" width="20" height="20" /> */}
+                    </View>
+                )
+            }
+            this.setState({ title: res.title, headerRight: right, showHeaderRight: true })
         })
     }
 
-    // 挂载组件后要执行的方法
-    componentDidMount() {
-        // 设置屏幕常亮
-        RNIdle.enableIdleTimer()
+    // 开启定时器
+    startInterval() {
+        storage.load({ key: Config.StartIntervalTagKey })
+            .then((k) => {
+                console.log("K:", k)
+                if (k === Config.StartIntervalTagValue) { // 存在定时器
+                    // this.clearTimer()
+                } else {
+                    storage.save({ key: Config.StartIntervalTagKey, data: Config.StartIntervalTagValue })
+                        .then(() => {
+                            this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
+                        })
+                }
+            }).catch((err) => {
+                if (err.name === 'NotFoundError') {  // 没找到数据
+                    storage.save({ key: Config.StartIntervalTagKey, data: Config.StartIntervalTagValue })
+                        .then(() => {
+                            this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
+                        })
+                }
+            })
+    }
 
+    refreshState() {
         const navigation = this.props.navigation
         // 判断是否存在番茄钟
         storage.load({ key: Config.TomatoTimerLocalStorageKey })
@@ -83,7 +116,7 @@ class TomatoTimer extends Component {
                     // 如果未结束，设置minute和seconds并且开启定时器
                     let t = this.timerIsExpired(timer)
                     if (t === true) {  // 过期
-                        this.setState({ minute: 0, seconds: 0, type: t.mode || 'work' }, () => {
+                        this.setState({ minute: 0, seconds: 0, type: timer.mode || 'work' }, () => {
                             if (navigation && navigation.getParam('id') && (navigation.getParam('id') !== timer.remind_task_id)) {
                                 // log("加载新的数据")
                                 this.setCurrentTomatoTimer(navigation.getParam('id'))
@@ -119,7 +152,8 @@ class TomatoTimer extends Component {
                             })
                             // 如果是正在运行，则启动定时器
                             if (t.current_status == T.STATUS_RUNNING) {
-                                this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
+                                console.log("启动")
+                                this.startInterval()
                             }
                         }
                     }
@@ -132,13 +166,67 @@ class TomatoTimer extends Component {
             })
     }
 
+    clearTimer() {
+        storage.save({ key: Config.StartIntervalTagKey, data: null })
+            .then(() => {
+                this.taskTimer && clearInterval(this.taskTimer)
+            })
+
+    }
+
+    // 挂载组件后要执行的方法
+    componentDidMount() {
+        // 设置屏幕常亮
+        RNIdle.disableIdleTimer()
+        this.refreshState()
+
+        const refreshState = () => {
+            return this.refreshState()
+        }
+
+        const clearTimer = () => {
+            this.clearTimer()
+        }
+        const nowPageIsFocused = () => {
+            return this.props.navigation.isFocused()
+        }
+        this.viewDidAppear = this.props.navigation.addListener(
+            'didFocus',
+            (obj) => {
+                this.refreshState()
+            }
+        )
+
+        this.didBlurSubscription = this.props.navigation.addListener(
+            'didBlur',
+            payload => {
+                this.clearTimer()
+            }
+        );
+
+
+        AppState.addEventListener('change', function (nextState) {
+            if (nextState === 'active') {  // 重新进入程序
+                // 重新开启定时器
+                if (nowPageIsFocused()) {
+                    refreshState()
+                }
+            }
+            if (nextState === 'inactive') {  // 退出程序
+                // 取消定时器
+                clearTimer()
+            }
+        })
+    }
+
 
 
     // 组件卸载时清除定时器
     componentWillUnmount() {
-        this.taskTimer && clearInterval(this.taskTimer)
+        this.clearTimer()
         // 取消屏幕常亮
-        RNIdle.disableIdleTimer()
+        RNIdle.enableIdleTimer()
+
     }
 
     // 开始任务
@@ -167,7 +255,8 @@ class TomatoTimer extends Component {
                 data: timer
             }).then((r) => {
                 // 打开倒计时定时器
-                this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
+                console.log("开始")
+                this.startInterval()
             })
             // 添加一个本地通知，当结束时进行通知
             let p = new PushNotificationRecord()
@@ -183,13 +272,17 @@ class TomatoTimer extends Component {
     timerCountdown() {
         storage.load({ key: Config.TomatoTimerLocalStorageKey })
             .then((timer) => {
+                if (timer === null) {
+                    this.clearTimer()
+                }
+                console.log(timer.seconds, timer.minute)
                 // 将当前state中的minute和seconds减一，直到为0
                 if (timer.minute === 0 && timer.seconds === 0) {
                     // 触发完成事件
                     this.taskNormalFinish()
                     //TODO 判断是否有下一个番茄
                     // 移除定时器
-                    this.taskTimer && clearInterval(this.taskTimer)
+                    this.clearTimer()
                 } else {
                     if (timer.seconds === 0 && timer.minute > 0) {
                         timer.minute = timer.minute - 1
@@ -208,10 +301,10 @@ class TomatoTimer extends Component {
 
     }
 
-   
+
 
     goBack() {
-        this.taskTimer && clearInterval(this.taskTimer)  // 清除定时器
+        this.clearTimer()  // 清除定时器
         this.props.navigation.goBack()
     }
 
@@ -256,7 +349,7 @@ class TomatoTimer extends Component {
                 let p = new PushNotificationRecord()
                 p.cancelLocalTomatoNotification(timer.id)
             })
-            this.taskTimer && clearInterval(this.taskTimer)
+            this.clearTimer()
         } else if (this.state.pauseButtonStatus === "start") { // 继续任务逻辑
             storage.load({ key: Config.TomatoTimerLocalStorageKey }).then((timer) => {
 
@@ -267,7 +360,9 @@ class TomatoTimer extends Component {
                 this.setState({ pauseButtonStatus: 'pause', minute: timer.minute, seconds: timer.seconds })
                 storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
 
-                this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
+                console.log("继续")
+                this.startInterval()
+
                 // 添加通知
                 let p = new PushNotificationRecord()
                 p.addTomatoLocationNotification({
@@ -294,46 +389,51 @@ class TomatoTimer extends Component {
                 let t = new T()
                 // 更新状态
                 t.updateToStopTimer(timer.id, T.STAUS_NORMAL_STOP)
+                // DeviceEventEmitter.emit("page-clear-timer")
                 // 销毁kv缓存
                 storage.save({ key: Config.TomatoTimerLocalStorageKey, data: null })
+                    .then(() => {
+                        // 弹出是否休息或者继续进行
+                        Alert.alert(this.state.type === 'work' ? '完成!' : '休息时间到!', this.state.type === 'work' ? '休息一下吧!' : '休息好了吗？继续？', [
+                            {
+                                text: this.state.type === 'work' ? '休息一下' : '再休息一会儿',
+                                onPress: () => {
+                                    this.setState({
+                                        total: Config.RestTomatoTimerLength,
+                                        minute: Config.RestTomatoTimerLength,
+                                        seconds: 0,
+                                        type: 'rest',
+                                        taskOptionsJustifyContent: 'center',
+                                        pauseButtonStatus: 'pause',
+                                    }, () => {
+                                        // 开启番茄钟
+                                        this.startTask()
+                                    })
+                                }
+                            },
+                            {
+                                text: this.state.type === 'work' ? '不了,继续奋斗!' : '继续奋斗！',
+                                onPress: () => {
+
+                                    // 继续下一个番茄钟
+                                    this.setState({
+                                        total: Config.TomatoTimerLength,
+                                        minute: Config.TomatoTimerLength,
+                                        seconds: 0,
+                                        type: 'work',
+                                        taskOptionsJustifyContent: 'center',
+                                        pauseButtonStatus: 'pause',
+                                    }, () => {
+
+                                    })
+
+                                }
+                            }
+                        ])
+                    })
             })
 
-        // 弹出是否休息或者继续进行
-        Alert.alert(this.state.type === 'work' ? '完成!' : '休息时间到!', this.state.type === 'work' ? '休息一下吧!' : '休息好了吗？继续？', [
-            {
-                text: this.state.type === 'work' ? '休息一下' : '再休息一会儿',
-                onPress: () => {
-                    // 改为休息番茄钟
-                    this.setState({
-                        total: Config.RestTomatoTimerLength,
-                        minute: Config.RestTomatoTimerLength,
-                        seconds: 0,
-                        type: 'rest',
-                        taskOptionsJustifyContent: 'center',
-                        pauseButtonStatus: 'pause',
-                    }, () => {
-                        // 开启番茄钟
-                        this.startTask()
-                    })
-                }
-            },
-            {
-                text: this.state.type === 'work' ? '不了,继续奋斗!' : '继续奋斗！',
-                onPress: () => {
-                    // 继续下一个番茄钟
-                    this.setState({
-                        total: Config.TomatoTimerLength,
-                        minute: Config.TomatoTimerLength,
-                        seconds: 0,
-                        type: 'work',
-                        taskOptionsJustifyContent: 'center',
-                        pauseButtonStatus: 'pause',
-                    }, () => {
 
-                    })
-                }
-            }
-        ])
 
     }
 
@@ -349,14 +449,14 @@ class TomatoTimer extends Component {
                     t.updateToStopTimer(timer.id, T.STATUS_UNNORMAL_STOP)
                     // 销毁当前kv缓存
                     storage.save({ key: Config.TomatoTimerLocalStorageKey, data: null })
-                    this.taskTimer && clearInterval(this.taskTimer) // 清除定时器
+                    this.clearTimer() // 清除定时器
                     // 定时器回归原状
                     this.setState({
                         total: Config.TomatoTimerLength,
                         minute: Config.TomatoTimerLength,
                         seconds: 0,
                         taskOptionsJustifyContent: 'center',
-                        type:'work'  // 不论是否是休息钟，结束后都回归工作钟
+                        type: 'work'  // 不论是否是休息钟，结束后都回归工作钟
                     })
                 })
         }
@@ -477,7 +577,7 @@ class TomatoTimer extends Component {
                         </View>
                         <Text style={styles.headerText}>{this.state.title}</Text>
                         <View style={styles.headerRight}>
-                            {this.state.headerRight}
+                            {this.state.showHeaderRight ? this.state.headerRight : null}
                         </View>
                     </View>
                     {/* body部分，计时器详情 */}
