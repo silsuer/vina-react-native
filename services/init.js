@@ -99,6 +99,24 @@ db.transaction((tx) => {
 })
 
 
+
+// db.transaction((tx) => {
+//     tx.executeSql(`drop table pigeonhole`, [], () => {
+//         console.log("success")
+//     })
+// })
+
+// 创建归档管理表
+db.transaction((tx)=>{
+    tx.executeSql(`create table if not exists pigeonhole (
+        id integer primary key not null,
+        name varchar(255) not null default '',
+        color varchar(255) not null default '#000000',
+        sequence int not null default 0,
+        pid int not null default 0
+    )`)
+})
+
 Date.prototype.format = function (fmt) {
     var o = {
         "M+": this.getMonth() + 1,                 //月份 

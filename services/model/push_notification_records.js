@@ -44,7 +44,6 @@ export class PushNotificationRecord {
         if (res.result.rows.length > 0) {
             // 获取第一行
             let row = res.result.rows.item(0)
-            console.log("正在取消本地推送:", row)
             // 取消后删除这一行
             this.deleteNotificationRecord(row.id)
                 .then((res) => {

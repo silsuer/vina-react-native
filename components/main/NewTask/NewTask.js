@@ -38,29 +38,6 @@ const styles = StyleSheet.create({
 
 class NewTask extends Component {
 
-    static navigationOptions = ({ navigation }) => {
-        let title = navigation.getParam('id') ? '提醒' : '新建'
-        let headerRight = []
-        if (navigation.getParam('id')) {
-            headerRight.push(
-                <TouchableOpacity key={1} onPress={() => {
-                    // 启动任务，传递参数,当前参数
-                    navigation.navigate('tomatoTimer', { id: navigation.getParam('id') })
-                }}>
-                    <TaskStartSvg style={{ padding: 10 }} color="#3a87f7" width="20" height="20" />
-                </TouchableOpacity>
-            )
-        }
-        return {
-            title: title,
-            header: null,
-            headerRight: headerRight,
-            headerRightContainerStyle: {
-                margin: 15,
-            }
-        }
-    };
-
     constructor(props) {
         super(props);
         this.state = {
@@ -716,7 +693,7 @@ class NewTask extends Component {
         return (
             <Provider>
                 <Page
-
+                    noScrollView
                     title={false}
                     left={[]}
                     right={[]}

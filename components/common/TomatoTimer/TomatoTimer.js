@@ -84,7 +84,6 @@ class TomatoTimer extends Component {
     startInterval() {
         storage.load({ key: Config.StartIntervalTagKey })
             .then((k) => {
-                console.log("K:", k)
                 if (k === Config.StartIntervalTagValue) { // 存在定时器
                     // this.clearTimer()
                 } else {
@@ -152,7 +151,6 @@ class TomatoTimer extends Component {
                             })
                             // 如果是正在运行，则启动定时器
                             if (t.current_status == T.STATUS_RUNNING) {
-                                console.log("启动")
                                 this.startInterval()
                             }
                         }
@@ -255,7 +253,6 @@ class TomatoTimer extends Component {
                 data: timer
             }).then((r) => {
                 // 打开倒计时定时器
-                console.log("开始")
                 this.startInterval()
             })
             // 添加一个本地通知，当结束时进行通知
@@ -275,7 +272,6 @@ class TomatoTimer extends Component {
                 if (timer === null) {
                     this.clearTimer()
                 }
-                console.log(timer.seconds, timer.minute)
                 // 将当前state中的minute和seconds减一，直到为0
                 if (timer.minute === 0 && timer.seconds === 0) {
                     // 触发完成事件
@@ -359,10 +355,7 @@ class TomatoTimer extends Component {
                 timer.seconds = this.state.seconds
                 this.setState({ pauseButtonStatus: 'pause', minute: timer.minute, seconds: timer.seconds })
                 storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
-
-                console.log("继续")
                 this.startInterval()
-
                 // 添加通知
                 let p = new PushNotificationRecord()
                 p.addTomatoLocationNotification({

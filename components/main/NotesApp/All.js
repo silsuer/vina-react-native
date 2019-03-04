@@ -76,7 +76,9 @@ class All extends Component {
                             backgroundColor: '#eab646',
                             color: 'white',
                         },
-                        onPress: () => console.log("归档")
+                        onPress: () => {
+                            this.props.navigation.navigate('pigeonhole', { id: data.id, type: 'remind_task' })
+                        }
                     }
                 ]}
                 swipeRight={[

@@ -15,6 +15,7 @@ import NotesMainApp from './components/main/NotesMainApp';
 import NewNote from './components/main/NotesApp/New/NewNote'
 import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
 import DrawerContentComponent from './components/common/Drawer'  // 侧边栏
+import Pigeonhole from './components/main/NotesApp/Pigeonhole'
 
 import './services/init'
 
@@ -102,11 +103,21 @@ const AppStackNavigator = createStackNavigator({
   },
   newRemindTask: {
     screen: NewTask,
+    navigationOptions: {
+      header: null
+    }
   },
   tomatoTimer: {
     screen: TomatoTimer,
     navigationOptions: {
       header: null
+    }
+  },
+  pigeonhole: {
+    screen: Pigeonhole,
+    navigationOptions: {
+      header: null,
+      gesturesEnabled: false
     }
   }
 }, {

@@ -1,6 +1,6 @@
 // 这里是每个页面的具体框架
 import React, { Component } from 'react'
-import { View, StyleSheet, Animated, ScrollView, LayoutAnimation, AppState, DeviceEventEmitter,KeyboardAvoidingView } from 'react-native'
+import { View, StyleSheet, Animated, ScrollView, LayoutAnimation, AppState, DeviceEventEmitter, KeyboardAvoidingView } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { withNavigation } from 'react-navigation'
 import Config from '../../configs/app';
@@ -67,7 +67,6 @@ class Page extends Component {
                 if (timer === null) {
                     this.clearTimer()
                 }
-                console.log("page timer:", timer.seconds, timer.minute)
                 if (timer.minute === 0 && timer.seconds === 0) {  //   任务完成,入库
                     // TODO  入库逻辑
                     this.taskTimer && clearInterval(this.taskTimer) // 停止计时
@@ -209,7 +208,6 @@ class Page extends Component {
         this.viewDidAppear = this.props.navigation.addListener(
             'willFocus',
             (obj) => {
-                console.log("焦点定时器")
                 refreshState()
             }
         )
@@ -217,7 +215,6 @@ class Page extends Component {
         this.didBlurSubscription = this.props.navigation.addListener(
             'willBlur',
             payload => {
-                console.log("移除定时器")
                 clearTimer()
             }
         );
@@ -264,7 +261,7 @@ class Page extends Component {
             body: {
                 flex: 6,
                 marginTop: 10,
-                alignItems:'center'
+                alignItems: 'center'
             },
             footer: {
                 position: 'absolute',
@@ -347,15 +344,32 @@ class Page extends Component {
             )
         }
 
-        return (
-            <LinearGradient locations={[0.2, 1]} colors={getMainBackgroundColor()} style={styles.container} >
-                <KeyboardAvoidingView  behavior="padding" enabled>
-                {getHeader()}
-                <ScrollView showsVerticalScrollIndicator={false}>
+        const getBody = () => {
+            if (this.props.noScrollView) {
+                console.log("hhh ")
+                return (
                     <Animated.View opacity={this.state.opacity} style={styles.body}>
                         {this.state.currentBody}
                     </Animated.View>
-                </ScrollView>
+                )
+            } else {
+                return (
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        <Animated.View opacity={this.state.opacity} style={styles.body}>
+                            {this.state.currentBody}
+                        </Animated.View>
+                    </ScrollView>
+                )
+            }
+        }
+
+        return (
+            <LinearGradient locations={[0.2, 1]} colors={getMainBackgroundColor()} style={styles.container} >
+                <KeyboardAvoidingView behavior="padding" enabled>
+                    {getHeader()}
+                    <Animated.View opacity={this.state.opacity} style={styles.body}>
+                        {this.state.currentBody}
+                    </Animated.View>
                 </KeyboardAvoidingView>
                 <FooterView tabBarColor={getHeaderBackgroundColor()} buttonIcon={getButtonIcon()} tabBarOptions={this.state.tabBarOptions} title={getTitleString()} />
 

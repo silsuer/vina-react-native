@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, Dimensions, StyleSheet, TouchableOpacity ,ScrollView} from 'react-native'
+import { View, Text, Dimensions, StyleSheet, TouchableOpacity } from 'react-native'
 import { SwipeAction } from '@ant-design/react-native'
 import Config from '../../configs/app'
 const mainWindow = Dimensions.get('window')
@@ -36,7 +36,6 @@ export class CardHeader extends Component {
             left: {
                 display: 'flex',
                 flexDirection: 'row',
-                // justifyContent: 'center',
                 alignItems: 'center',
                 flex: 1,
             },
