@@ -101,7 +101,7 @@ class Pigeonhole extends Component {
         })
     }
 
-    
+
 
     render() {
 
@@ -167,7 +167,7 @@ class Pigeonhole extends Component {
                         title={this.props.navigation.getParam('id') ? '归档' : '归档管理'}
                         extra={getHeaderExtra()}
                     />
-                    <View style={{ height: windowHeight*0.9, backgroundColor: '#f5f5f5', borderRadius: 5 }}>
+                    <View style={{ height: windowHeight * 0.9, backgroundColor: '#f5f5f5', borderRadius: 5 }}>
                         {getCardBody()}
                     </View>
                 </CardContainer>
@@ -187,6 +187,8 @@ class Pigeonhole extends Component {
 
                 <Modal visible={this.state.showCreatePigeonholeModal}
                     transparent
+                    maskClosable
+                    onClose={() => { this.setState({ showCreatePigeonholeModal: false }) }}
                     title="新归档"
                     footer={[
                         { text: '取消', onPress: () => { this.setState({ showCreatePigeonholeModal: false }) } },

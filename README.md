@@ -14,3 +14,8 @@
 ### 依赖有手动修改的部分
 
  - ![解决当使用富文本编辑器的时候报warning的问题](https://github.com/wix/react-native-zss-rich-text-editor/issues/79) 
+
+
+ 关于ListView: 
+setState会触发render，但render未必导致ListView刷新
+ListView有点特殊，必须修改datasource才会更新。datasource的修改必须通过调用cloneWith方法，这个方法多半是接受一个数组。这里就还存在一个问题，数组是引用型数据，所以如果你只在原数组上修改，其引用地址不会变，那么cloneWith方法会认为数组没有变化。所以你还需要想办法得到一个“新”数组。可以使用 setState({list:JSON.parse(JSON.stringfy(list))}) 这样就可以了
