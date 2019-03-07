@@ -94,7 +94,6 @@ class SortableDragList extends Component {
 
     componentWillReceiveProps(props) {
         // 获取数组，把数组变为对象
-        // this.convertListToObj(props.data)
         this.setState({ list: props.data.list, order: props.data.order })
     }
 

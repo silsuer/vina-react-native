@@ -124,7 +124,11 @@ export class RemindTask {
             for (let i = 0; i < list.length; i++) {
                 tmpArr.push('?')
             }
-            let res = await exec(`select remind_task.*,posts.type as post_type,posts.content as comment from remind_task left join posts on remind_task.content_id=posts.id  where remind_task.id in (` + tmpArr.join(',') + `)`, list).catch((err) => {
+            let res = await exec(`select remind_task.*,posts.type as post_type,posts.content as comment,pigeonhole.id as pig_id,pigeonhole.color as pig_color from remind_task 
+                                  left join posts on remind_task.content_id=posts.id  
+                                  left join pigeonhole_relation on pigeonhole_relation.relation_id=remind_task.id and pigeonhole_relation.type=1
+                                  left join pigeonhole on pigeonhole_relation.pigeonhole_id=pigeonhole.id and pigeonhole_relation.type=1
+                                  where remind_task.id in (` + tmpArr.join(',') + `)`, list).catch((err) => {
                 console.log("查找提醒任务失败:", err)
             })
             for (let i = 0; i < res.result.rows.length; i++) {

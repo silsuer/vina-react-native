@@ -356,3 +356,42 @@ export class SequenceSvg extends Component {
         )
     }
 }
+
+// 向右箭头（指示可下拉）
+export class RightSvg extends Component {
+    render() {
+        let color = this.props.color ? this.props.color : 'white'
+        return (
+            <Svg t="1551943657279" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" pid="1919" xmlnsXlink="http://www.w3.org/1999/xlink" width={this.props.width ? this.props.width : 25} height={this.props.height ? this.props.height : 25}>
+                <Path d="M311.168 865.834667a42.666667 42.666667 0 0 0 60.330667 60.330666l384-384a42.666667 42.666667 0 0 0 0-60.330666l-384-384a42.666667 42.666667 0 0 0-60.330667 60.330666L665.002667 512l-353.834667 353.834667z" pid="1920" fill={color}>
+                </Path>
+            </Svg>
+        )
+    }
+}
+// 向下箭头（指示已下拉）
+export class DownSvg extends Component {
+    render() {
+        let color = this.props.color ? this.props.color : 'white'
+        return (
+            <Svg t="1551943640298" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" pid="1099" xmlnsXlink="http://www.w3.org/1999/xlink" width={this.props.width ? this.props.width : 25} height={this.props.height ? this.props.height : 25}>
+                <Path d="M561.33897184 711.84264839c-10.55772482 10.55772482-24.88606564 20.36132644-38.46028328 17.34483365-13.57421762 2.2623696-26.39431205-8.29535522-36.95203687-17.34483363L159.39130543 383.79905573c-16.59071043-16.59071043-16.59071043-43.73914569 0-60.32985609s43.73914569-16.59071043 60.32985611 0l303.91165023 312.20700542L828.29858516 323.46919964c16.59071043-16.59071043 43.73914569-16.59071043 60.32985611-1e-8s16.59071043 43.73914569-1e-8 60.3298561l-327.28946942 328.04359266z" fill={color} pid="1100">
+                </Path>
+            </Svg>
+        )
+    }
+}
+
+
+// 确认选中（个性对号）
+export class TakeSelectedSvg extends Component {
+    render() {
+        let color = this.props.color ? this.props.color : 'white'
+        return (
+            <Svg t="1551951621534" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" pid="3347" xmlnsXlink="http://www.w3.org/1999/xlink" width={this.props.width ? this.props.width : 25} height={this.props.height ? this.props.height : 25}>
+                <Path d="M55.125333 650.695111c0 0 0 0 227.555556-138.695111 92.444444 112.014222 135.111111 229.319111 135.111111 229.319111S526.222222 323.584 908.458667 110.250667c0 0-48.014222 220.444444 58.652444 287.971556 0 0-396.458667 159.971556-531.569778 570.652444C435.541333 968.874667 320 778.695111 55.125333 650.695111z" pid="3348" fill={color}>
+                </Path>
+            </Svg>
+        )
+    }
+}

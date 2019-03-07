@@ -5,9 +5,11 @@ import { View, Text, DeviceEventEmitter } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { CardContainer, CardHeader, CardBody, CardList, CardListItem } from '../../common/CardContainer'
 import { RemindTask } from '../../../services/model/remind_task'
+import { PigeonholeRelation } from '../../../services/model/pigeonhole_relation'
 import { TaskIcon } from '../../assets/svgs/NotesSvg'
 import { DeleteSvg, PigeonholeSvg, TaskStartSvg, TagSvg } from '../../assets/svgs/Common'
 import { convertMinuteToHour, convertTimeToManual } from '../../../services/common_func'
+import { Toast } from '@ant-design/react-native';
 // 所有（任务/日程/便签）界面
 class All extends Component {
 
@@ -77,7 +79,15 @@ class All extends Component {
                             color: 'white',
                         },
                         onPress: () => {
-                            this.props.navigation.navigate('pigeonhole', { id: data.id, type: 'remind_task' })
+                            this.props.navigation.navigate('pigeonhole', {
+                                id: data.id,
+                                type: PigeonholeRelation.TYPE_REMIND_TASK,
+                                selectedId: data.pig_id,
+                                goBackCallback: () => { // 返回时执行的回调
+                                    Toast.success("已归档")
+                                    this.refreshList()
+                                }
+                            })
                         }
                     }
                 ]}
@@ -102,7 +112,7 @@ class All extends Component {
                     }
                 ]}
                 title={data.title}
-                headerIcon={<TaskIcon color="blue" width="14" height="14" />}
+                headerIcon={<TaskIcon color={data.pig_color || "#000000"} width="14" height="14" />}
                 headerExtra={[
                     data.remind_at ? <Text style={{ color: 'grey' }}>{convertTimeToManual(data.remind_at)}</Text> : null,
                     data.tomato_number ? <Text style={{ color: 'grey' }}>{convertMinuteToHour((data.tomato_number || 0) * 25)}</Text> : null,

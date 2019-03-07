@@ -117,6 +117,22 @@ db.transaction((tx)=>{
     )`)
 })
 
+
+// db.transaction((tx) => {
+//     tx.executeSql(`drop table pigeonhole_relation`, [], () => {
+//         console.log("success")
+//     })
+// })
+// 创建归档关联表
+db.transaction((tx)=>{
+    tx.executeSql(`create table if not exists pigeonhole_relation(
+        id integer primary key not null,
+        type int not null default 0,
+        pigeonhole_id int not null default 0,
+        relation_id int not null default 0
+    )`)
+})
+
 Date.prototype.format = function (fmt) {
     var o = {
         "M+": this.getMonth() + 1,                 //月份 

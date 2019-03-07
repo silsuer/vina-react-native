@@ -1,16 +1,16 @@
 import React, { Component } from 'react'
 import { View, TouchableOpacity, Dimensions, Text, StyleSheet } from 'react-native'
 import { CardContainer, CardHeader, CardBody, CardList, CardListItem } from '../../common/CardContainer'
-import { CloseSvg, DetermineSvg, EmptySvg, CreatePigeonholeSvg, PigeonholeSvg } from '../../assets/svgs/Common'
-import { List, SwipeAction, InputItem, Toast } from '@ant-design/react-native'
+import { CloseSvg, DetermineSvg, EmptySvg, CreatePigeonholeSvg, TakeSelectedSvg, RightSvg, DownSvg } from '../../assets/svgs/Common'
+import { List, SwipeAction, InputItem, Toast, Provider, Modal } from '@ant-design/react-native'
 import Collapsible from 'react-native-collapsible'
-import { Provider, Modal } from '@ant-design/react-native'
 import Page from '../../common/Page'
 import { Target } from '../../assets/svgs/NotesSvg'
 import { ColorPicker, fromHsv } from 'react-native-color-picker'
 import { Pigeonhole as P } from '../../../services/model/pigeonhole'
 import SortableDragList from '../../common/SortableList'
 import { ToolBarSvg } from '../../assets/svgs/RichTextEditor'
+import { PigeonholeRelation } from '../../../services/model/pigeonhole_relation'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -27,6 +27,8 @@ class Pigeonhole extends Component {
             tmpPigeonhole: {},  // 临时归档对象 title pid color sequence id
             pigeonholeList: [],  // 这里是正常渲染的数据列表
             status: 'common',     // edit 是正在编辑状态 common 是正常选择状态
+            collapsedStatus: {},
+            selectedPigeonholeId: 0,   // 当前正在选择的归档id，只在给数据归档的时候有用处
         }
     }
 
@@ -64,24 +66,37 @@ class Pigeonhole extends Component {
 
     // 刷新列表
     refreshPigeonholeList() {
+
+        const getListFromPid = (list, pid) => {
+            let res = []
+            for (let i = 0; i < list.length; i++) {
+                if (list[i].pid === pid) {
+                    list[i].children = getListFromPid(list, list[i].id)
+                    res.push(list[i])
+                }
+            }
+            return res
+        }
+
         // 从归档表中取出所有数据
         let p = new P()
         p.findAll()
             .then((list) => {
-                this.setState({ pigeonholeList: list })
+                let res = getListFromPid(list, 0)
+                // 将得到的list根据pid重新组装成数组
+                this.setState({ pigeonholeList: res })
             })
+
+
     }
+
+
 
     componentDidMount() {
         this.refreshPigeonholeList()
-
-        // 做个实验  输出接收到的数据和转换出的数据
-        // let received = JSON.parse(`[{"sequence":0,"id":1,"name":"Hhh","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":2,"name":"Asd","pid":0,"color":"#000000","layerNumber":1,"active":false,"children":[{"sequence":0,"id":3,"name":"Ddd","pid":0,"color":"#000000","layerNumber":2,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":3,"active":false},{"sequence":0,"id":4,"name":"Bbb","pid":0,"color":"#000000","layerNumber":3,"active":false,"children":[{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]}]}]}]},{"sequence":0,"id":7,"name":"3","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":8,"name":"4","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":9,"name":"5","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":10,"name":"7","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":11,"name":"33","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":12,"name":"22","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":13,"name":"44","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":14,"name":"234","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":15,"name":"432","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":16,"name":"334","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":17,"name":"443","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":18,"name":"445","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":19,"name":"444","pid":0,"color":"#000000","layerNumber":1,"active":false}]`)
-        // let converted = JSON.parse(`{"1":{"sequence":0,"id":1,"name":"Hhh","pid":0,"color":"#000000","layerNumber":1,"active":false},"2":{"sequence":0,"id":2,"name":"Asd","pid":0,"color":"#000000","layerNumber":1,"active":false,"children":[{"sequence":0,"id":3,"name":"Ddd","pid":0,"color":"#000000","layerNumber":2,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":3,"active":false},{"sequence":0,"id":4,"name":"Bbb","pid":0,"color":"#000000","layerNumber":3,"active":false,"children":[{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]}]}]}]},"3":{"sequence":0,"id":3,"name":"Ddd","pid":0,"color":"#000000","layerNumber":2,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":3,"active":false},{"sequence":0,"id":4,"name":"Bbb","pid":0,"color":"#000000","layerNumber":3,"active":false,"children":[{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]}]}]},"4":{"sequence":0,"id":4,"name":"Bbb","pid":0,"color":"#000000","layerNumber":3,"active":false,"children":[{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]}]},"5":{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]},"6":{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false},"7":{"sequence":0,"id":7,"name":"3","pid":0,"color":"#000000","layerNumber":1,"active":false},"8":{"sequence":0,"id":8,"name":"4","pid":0,"color":"#000000","layerNumber":1,"active":false},"9":{"sequence":0,"id":9,"name":"5","pid":0,"color":"#000000","layerNumber":1,"active":false},"10":{"sequence":0,"id":10,"name":"7","pid":0,"color":"#000000","layerNumber":1,"active":false},"11":{"sequence":0,"id":11,"name":"33","pid":0,"color":"#000000","layerNumber":1,"active":false},"12":{"sequence":0,"id":12,"name":"22","pid":0,"color":"#000000","layerNumber":1,"active":false},"13":{"sequence":0,"id":13,"name":"44","pid":0,"color":"#000000","layerNumber":1,"active":false},"14":{"sequence":0,"id":14,"name":"234","pid":0,"color":"#000000","layerNumber":1,"active":false},"15":{"sequence":0,"id":15,"name":"432","pid":0,"color":"#000000","layerNumber":1,"active":false},"16":{"sequence":0,"id":16,"name":"334","pid":0,"color":"#000000","layerNumber":1,"active":false},"17":{"sequence":0,"id":17,"name":"443","pid":0,"color":"#000000","layerNumber":1,"active":false},"18":{"sequence":0,"id":18,"name":"445","pid":0,"color":"#000000","layerNumber":1,"active":false},"19":{"sequence":0,"id":19,"name":"444","pid":0,"color":"#000000","layerNumber":1,"active":false}}`)
-
-        // console.log("接受了:", received)
-        // console.log("转换后:", converted)
-
+        if (this.props.navigation.getParam('selectedId')) {
+            this.setState({ selectedPigeonholeId: this.props.navigation.getParam('selectedId') })
+        }
     }
 
     changeTmpPigeonholeTitleValue(value) {
@@ -90,21 +105,65 @@ class Pigeonhole extends Component {
         this.setState({ tmpPigeonhole: data })
     }
 
+    // 点击折叠行
+    _onPressCollapsedStatusListItem = (id) => {
+
+        // 如果传来了id，证明是要选择一行进行归档，将这一行选中
+        if (this.props.navigation.getParam('id')) {
+            console.log(id);
+            this.setState({ selectedPigeonholeId: id })
+        }
+
+        let s = this.state.collapsedStatus
+        if (s[id] === undefined || s[id] === true) {
+            s[id] = false
+        } else {
+            s[id] = true
+        }
+        this.setState({ collapsedStatus: s })
+    }
+
+    _ListItemGetExtra(data) {
+        if (data.children && data.children.length > 0) {
+            if (this.state.collapsedStatus[data.id] === undefined || this.state.collapsedStatus[data.id] === true) {
+                // 闭合状态
+                return (
+                    <RightSvg color="#d4d4d4" width="15" height="15" />
+                )
+            } else {
+                // 开启状态
+                return (
+                    <DownSvg color="#d4d4d4" width="15" height="15" />
+                )
+            }
+        }
+        return (
+            <View></View>
+        )
+    }
+
     // 递归渲染折叠面板
     recursionRenderCollapsiblePanel(list, layerNumber) {
-        let n = layerNumber || 1
+        let n = layerNumber || 0
         return list.map((data, index) => {
             return (
                 <View key={index}>
                     {/* 头部 */}
-                    <List.Item>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 5 * n }}>
-                            <Target width="10" height="10" color={data.color} />
-                            <Text style={{ marginLeft: 7 }}>{data.name}</Text>
-                        </View>
+                    <List.Item
+                        style={{ backgroundColor: data.id === this.state.selectedPigeonholeId ? '#f4f4f455' : 'white' }}
+                        extra={data.children && data.children.length > 0 ? (this.state.collapsedStatus[data.id] == undefined || this.state.collapsedStatus[data.id] == true ? <RightSvg width="15" height="15" color="#d4d4d4" /> : <DownSvg width="15" height="15" color="#d4d4d4" />) : <View></View>}
+                    >
+                        <TouchableOpacity onPress={this._onPressCollapsedStatusListItem.bind(this, data.id)} >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 15 * n }}>
+                                <Target width="10" height="10" color={data.color} />
+                                <Text style={{ marginLeft: 7 }}>{data.name}</Text>
+                            </View>
+                        </TouchableOpacity>
                     </List.Item>
                     {/* 折叠部分 */}
-                    {data.children ? this.recursionRenderCollapsiblePanel(data.children, n + 1) : null}
+                    <Collapsible collapsed={this.state.collapsedStatus[data.id]}>
+                        {data.children ? this.recursionRenderCollapsiblePanel(data.children, n + 1) : null}
+                    </Collapsible>
                 </View>
             )
         })
@@ -113,8 +172,6 @@ class Pigeonhole extends Component {
     // 将归档列表转换为sort组件可识别的多维数组
     convertListToObj() {
         let l = this.state.pigeonholeList
-        console.log("接收到的数据：")
-        console.log(JSON.stringify(l))
         this.tmpP = []
         this.refreshList(this.state.pigeonholeList)
         let r = {}
@@ -123,12 +180,6 @@ class Pigeonhole extends Component {
             r[this.tmpP[i].id] = this.tmpP[i]
             order.push(this.tmpP[i].id)
         }
-        // console.log("数组编程对象:", arr)
-        // this.setState({ list: r, order: Object.keys(r) })
-        // console.log("转换后的数据:")
-        // console.log(r)
-
-        // console.log(Object.keys(r))
         return { list: r, order: order }
     }
 
@@ -142,27 +193,42 @@ class Pigeonhole extends Component {
             if (!(this.tmpP)) {
                 this.tmpP = []
             }
-            console.log(d)
             this.tmpP.push(d)
 
             if (d.children && d.children.length > 0) {
                 this.refreshList(d.children, n + 1)
             }
         }
-        // return res
+
     }
 
-    // 保存排序后的数据
+    // 点击确认后保存排序后的数据
     saveSortedData() {
-        // console.log("11", Pigeonhole.TmpPigeonholeList)
-        this.setState({ pigeonholeList: Pigeonhole.TmpPigeonholeList })
+        // 递归保存归档层级
+        this.recursionSavePigeonhole(Pigeonhole.TmpPigeonholeList, 0);
+
+        this.setState({ pigeonholeList: Pigeonhole.TmpPigeonholeList, status: 'common' }, () => {
+            // 重新刷新数据
+            this.refreshPigeonholeList()
+        })
     }
 
+    // 递归保存数据
+    recursionSavePigeonhole(list, pid) {
+        for (let i = 0; i < list.length; i++) {
+            if (!(this.globalP)) {
+                this.globalP = new P()
+            }
+            this.globalP.updatePid(list[i].id, pid, i)
+            if (list[i].children && list[i].children.length > 0) {
+                this.recursionSavePigeonhole(list[i].children, list[i].id)
+            }
+        }
+    }
+
+    // 保存排序后的临时数据
     saveTmpPigeonholeList(data) {
 
-
-        // console.log("接收到的数据:")
-        // console.log(JSON.stringify(data))
         Pigeonhole.TmpPigeonholeList = data
     }
 
@@ -176,14 +242,7 @@ class Pigeonhole extends Component {
             }
         })
 
-        /**
-         [{"sequence":0,"id":1,"name":"Hhh","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":2,"name":"Asd","pid":0,"color":"#000000","layerNumber":1,"active":false,"children":[{"sequence":0,"id":3,"name":"Ddd","pid":0,"color":"#000000","layerNumber":2,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":3,"active":false},{"sequence":0,"id":4,"name":"Bbb","pid":0,"color":"#000000","layerNumber":3,"active":false,"children":[{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]}]}]}]},{"sequence":0,"id":7,"name":"3","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":8,"name":"4","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":9,"name":"5","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":10,"name":"7","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":11,"name":"33","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":12,"name":"22","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":13,"name":"44","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":14,"name":"234","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":15,"name":"432","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":16,"name":"334","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":17,"name":"443","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":18,"name":"445","pid":0,"color":"#000000","layerNumber":1,"active":false},{"sequence":0,"id":19,"name":"444","pid":0,"color":"#000000","layerNumber":1,"active":false}]
-
-    {"1":{"sequence":0,"id":1,"name":"Hhh","pid":0,"color":"#000000","layerNumber":1,"active":false},"2":{"sequence":0,"id":2,"name":"Asd","pid":0,"color":"#000000","layerNumber":1,"active":false,"children":[{"sequence":0,"id":3,"name":"Ddd","pid":0,"color":"#000000","layerNumber":2,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":3,"active":false},{"sequence":0,"id":4,"name":"Bbb","pid":0,"color":"#000000","layerNumber":3,"active":false,"children":[{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]}]}]}]},"3":{"sequence":0,"id":3,"name":"Ddd","pid":0,"color":"#000000","layerNumber":2,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":3,"active":false},{"sequence":0,"id":4,"name":"Bbb","pid":0,"color":"#000000","layerNumber":3,"active":false,"children":[{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]}]}]},"4":{"sequence":0,"id":4,"name":"Bbb","pid":0,"color":"#000000","layerNumber":3,"active":false,"children":[{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]}]},"5":{"sequence":0,"id":5,"name":"1","pid":0,"color":"#000000","layerNumber":4,"active":false,"children":[{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false}]},"6":{"sequence":0,"id":6,"name":"2","pid":0,"color":"#000000","layerNumber":5,"active":false},"7":{"sequence":0,"id":7,"name":"3","pid":0,"color":"#000000","layerNumber":1,"active":false},"8":{"sequence":0,"id":8,"name":"4","pid":0,"color":"#000000","layerNumber":1,"active":false},"9":{"sequence":0,"id":9,"name":"5","pid":0,"color":"#000000","layerNumber":1,"active":false},"10":{"sequence":0,"id":10,"name":"7","pid":0,"color":"#000000","layerNumber":1,"active":false},"11":{"sequence":0,"id":11,"name":"33","pid":0,"color":"#000000","layerNumber":1,"active":false},"12":{"sequence":0,"id":12,"name":"22","pid":0,"color":"#000000","layerNumber":1,"active":false},"13":{"sequence":0,"id":13,"name":"44","pid":0,"color":"#000000","layerNumber":1,"active":false},"14":{"sequence":0,"id":14,"name":"234","pid":0,"color":"#000000","layerNumber":1,"active":false},"15":{"sequence":0,"id":15,"name":"432","pid":0,"color":"#000000","layerNumber":1,"active":false},"16":{"sequence":0,"id":16,"name":"334","pid":0,"color":"#000000","layerNumber":1,"active":false},"17":{"sequence":0,"id":17,"name":"443","pid":0,"color":"#000000","layerNumber":1,"active":false},"18":{"sequence":0,"id":18,"name":"445","pid":0,"color":"#000000","layerNumber":1,"active":false},"19":{"sequence":0,"id":19,"name":"444","pid":0,"color":"#000000","layerNumber":1,"active":false}}
-         */
-
         const getHeaderExtra = () => {
-            const navigation = this.props.navigation
 
             let extra = []
             if (this.state.status === 'edit') {
@@ -203,11 +262,39 @@ class Pigeonhole extends Component {
             } else {
                 extra = [
                     <TouchableOpacity onPress={() => {
+                        // 设置编辑状态时就先设置 要传入的数据
                         this.setState({ status: 'edit' })
                     }}>
                         <ToolBarSvg color="#1e294199" width="17" height="17" />
                     </TouchableOpacity>,
                 ]
+
+                if (this.props.navigation.getParam('id')) { // 存在id 要显示确认
+                    extra.push(
+                        <TouchableOpacity onPress={() => {
+                            if (this.state.selectedPigeonholeId === 0) {
+                                Toast.fail("请选择归档")
+                                return
+                            }
+                            let id = this.props.navigation.getParam('id')
+                            let type = this.props.navigation.getParam('type')  // 类型
+                            // 添加或修改归档关联
+                            let pl = new PigeonholeRelation()
+                            pl.updateRelation(id, this.state.selectedPigeonholeId, type)
+                                .then((res) => {
+                                    // 更新完成，返回
+                                    if (this.props.navigation.getParam('goBackCallback')) {
+                                        const { state } = this.props.navigation
+                                        state.params.goBackCallback()
+                                    }
+                                    this.props.navigation.goBack()
+                                })
+                        }}>
+                            <TakeSelectedSvg color="#1e294199" width="19" height="19" />
+                        </TouchableOpacity>
+                    )
+                }
+
             }
             return extra
         }

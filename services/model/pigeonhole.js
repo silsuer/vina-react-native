@@ -19,7 +19,7 @@ export class Pigeonhole {
 
     // 获取所有归档数据（按照层级显示）
     async findAll() {
-        let res = await exec(`select * from pigeonhole`)
+        let res = await exec(`select * from pigeonhole order by sequence`)
         let r = []
         for (let i = 0; i < res.result.rows.length; i++) {
             r.push(res.result.rows.item(i))
@@ -31,5 +31,10 @@ export class Pigeonhole {
     // 将获取的rows重新按照pid整理成多维数组
     refreshResult(rows) {
         console.log(rows)
+    }
+
+
+    updatePid(id, pid, sequence) {
+        exec(`update ${this.tableName} set pid=?,sequence=? where id=?`, [pid, sequence, id]).catch((err) => { console.log("更新归档pid失败:", err) })
     }
 }
