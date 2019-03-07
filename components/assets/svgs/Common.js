@@ -335,10 +335,8 @@ export class CreatePigeonholeSvg extends Component {
     render() {
         let color = this.props.color ? this.props.color : 'white'
         return (
-            <Svg t="1551497496025" class="icon" style="" viewBox="0 0 1243 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" pid="1967" xmlnsXlink="http://www.w3.org/1999/xlink" width={this.props.width ? this.props.width : 25} height={this.props.height ? this.props.height : 25}>
-                <Path d="M773.193143 574.683429H585.142857v62.683428h188.050286v188.123429h62.756571V637.366857H1024v-62.683428h-188.050286V386.633143h-62.756571z" pid="1968" fill={color}>
-                </Path>
-                <Path d="M961.316571 198.509714H585.142857L459.776 73.142857H208.969143C171.373714 73.142857 146.285714 98.230857 146.285714 135.826286v626.980571c0 37.595429 25.088 62.683429 62.683429 62.683429H585.142857v-62.683429H208.969143V261.12h752.347428v125.44H1024V261.12c0-37.595429-25.088-62.683429-62.683429-62.683429z m-752.347428 0v-62.683428h225.718857l62.683429 62.683428H208.969143z" pid="1969" fill={color}>
+            <Svg t="1551867422279" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" pid="1293" xmlnsXlink="http://www.w3.org/1999/xlink" width={this.props.width ? this.props.width : 25} height={this.props.height ? this.props.height : 25}>
+                <Path d="M985.28768 473.55904h-438.64064V34.9184a34.9184 34.9184 0 0 0-69.8368 0v438.64064H38.1696a34.9184 34.9184 0 0 0 0 69.8368h438.64576v438.64064a34.9184 34.9184 0 0 0 69.8368 0v-438.64064h438.64064a34.9184 34.9184 0 1 0-0.00512-69.8368z" fill={color} pid="1294">
                 </Path>
             </Svg>
         )

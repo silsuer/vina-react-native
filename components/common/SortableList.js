@@ -45,10 +45,16 @@ class SortableDragList extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            data: [],   // 最终这里成的多维数组
             list: {}, // 要渲染得数据，传入的数据要整理成合适的格式
             order: [],
             activeBoxId: 0,  // 当前拖拽行正要进入得父行id（拖到其他文件夹中）
-            activeId: 0  // 当前正在拖拽得id
+            activeId: 0, // 当前正在拖拽得id（已放弃我，现在这个字段仅仅用来标记定时器是否继续运行）
+            activeRow: {},  // 正在活动的数据
+            activeFrom: -1,  // 移动row开始移动时候的索引
+            activeTo: -1,   // 移动row结束移动时候的索引
+            tmpList: [],  // 临时存储拖拽时子文件夹得数组
+
         }
         this.listComponent = {}
     }
@@ -82,12 +88,14 @@ class SortableDragList extends Component {
 
     componentDidMount() {
 
-        this.convertListToObj(this.props.data)
+
+        this.setState({ list: this.props.data.list, order: this.props.data.order })
     }
 
     componentWillReceiveProps(props) {
         // 获取数组，把数组变为对象
-        this.convertListToObj(props.data)
+        // this.convertListToObj(props.data)
+        this.setState({ list: props.data.list, order: props.data.order })
     }
 
     clearTimer() {
@@ -109,12 +117,15 @@ class SortableDragList extends Component {
     async getOthersPageY(id) {
 
         let order = this.state.order
-        let res = {}
+        let res = []
         for (let i = 0; i < order.length; i++) {
-            if (parseInt(order[i]) === id) {
-                continue
-            }
-            res[order[i]] = await this.getPageY(this.rowComponentRef[order[i]])
+            // if (parseInt(order[i]) === id) {
+            //     continue
+            // }
+            res.push({
+                index: order[i],
+                pageY: await this.getPageY(this.rowComponentRef[order[i]])
+            })
         }
         return res
     }
@@ -127,26 +138,42 @@ class SortableDragList extends Component {
             if (this.state.activeId == 0) {
                 return
             }
-
-
             let currentY = await this.getPageY(this.rowComponentRef[data.id])
             let currentList = await this.getOthersPageY(data.id)
+
+            // 设置to，得到当前pageY在整个order 中的索引
+            currentList.sort(function (a, b) {
+                if (a.pageY === 0) {
+                    return 1
+                }
+                return a.pageY - b.pageY
+            })
+
+
             let number = 0
             let id = 0
-            for (let n in currentList) {
-                if ((currentY - currentList[n]) < 23 && (currentY - currentList[n]) > -23) {
-                    if (parseInt(n) == data.id) {
-                        continue
-                    }
-                    number += 1
-                    id = parseInt(n)
+            for (let i = 0; i < currentList.length; i++) { // n是id 值是Y轴值
+                if (parseInt(currentList[i].index) == data.id) {
+                    this.RowTo = i
+                    continue
+                }
+                if ((currentY - currentList[i].pageY) < 23 && (currentY - currentList[i].pageY) > -23) {
 
+                    number += 1
+                    id = parseInt(currentList[i].index)
+                    if (currentY - currentList[i].pageY < 23 && currentY - currentList[i].pageY >= 0) {
+                        this.activeBoxStatus = 'down' // 这是在要进入得文件夹下面
+                    }
+                    if (currentY - currentList[i].pageY > -23 && currentY - currentList[i].pageY < 0) {
+                        this.activeBoxStatus = 'up'  // 这是在要进入得文件夹的下面
+                    }
                 }
             }
 
+
+
             // 如果判定出这个可以选中，那就直接改变list中的active，然后在渲染得时候设置
             if (number > 0 && this.state.activeId > 0) {
-                console.log("设置")
                 this.setActiveStatus(id)
                     .then(() => {
                         start()
@@ -155,14 +182,11 @@ class SortableDragList extends Component {
                 if (this.state.activeId > 0) {
                     this.setActiveStatus(0)
                         .then(() => {
-                            console.log(222)
                             start()
                         })
                 } else {
                     return
                 }
-
-                //  start()
             }
         }
 
@@ -190,18 +214,165 @@ class SortableDragList extends Component {
 
     // 当开始拖拽排序时调用
     _onRowActive(row) {
+
+        // 将当前文件夹下的所有数据隐藏
+        // let list = JSON.parse(JSON.stringify(this.state.list))
+        // let order = JSON.parse(JSON.stringify(this.state.order))
+        let list = this.state.list
+        let order = this.state.order
+
+        let flag = false
+        let tmpList = []
+        let n = 0
+        let index = -1
+
+        // ======== 隐藏子文件夹 ===========
+        for (let i = 0; i < order.length; i++) {
+            if (parseInt(order[i]) === row.rowData.data.id) {
+                flag = true
+                index = i
+                continue
+            }
+            if (flag === true) {
+                if (list[order[i]].layerNumber > row.rowData.data.layerNumber) {
+                    n += 1
+                } else {
+                    break
+                }
+            }
+        }
+
+        // 从order中删除
+        if (n > 0 && index > -1) {
+            let t = order.splice(index + 1, n)
+            for (let i = 0; i < t.length; i++) {
+                tmpList.push(list[t[i]])
+                delete list[t[i]]
+            }
+        }
+
+        // ========= END ================
+
+        // 得到from 即当前row在order中的索引
+        for (let i = 0; i < order.length; i++) {
+            if (parseInt(order[i]) === row.rowData.data.id) {
+                this.RowFrom = i
+                break
+            }
+        }
+
         // 开启一个定时器，判断当前行的位置，和其他所有行得位置
-        this.setState({ activeId: row.rowData.data.id }, () => {
+        this.setState({
+            activeId: row.rowData.data.id,
+            activeRow: row.rowData.data,
+            order: order,
+            list: list,
+            tmpList: tmpList
+        }, () => {
             this.setupTimer(row.rowData.data)
         })
     }
 
+    // 恢复列表,传入的是tmpList要跟着渲染的行的id
+    restoreList(id, type) {
+
+        let t = type || 'cancel' // 取消状态下不改变layerNumber active状态改变(表示拖拽进文件夹)
+
+        return new Promise((resolve, reject) => {
+            let order = this.state.order
+            let list = this.state.list
+            let tmpList = this.state.tmpList
+            // 先从order里查出这个id的索引
+            // 将tmpList 的索引加入order中
+            // 将tmpList重新加入list中
+            let n = -1
+            for (let i = 0; i < order.length; i++) {
+                if (parseInt(order[i]) === id) {
+                    n = i + 1
+                    break
+                }
+            }
+            let res = []
+            let nowObj = list[id]
+            for (let i = 0; i < tmpList.length; i++) {
+                if (t !== 'cancel') {
+                    tmpList[i].layerNumber = parseInt(tmpList[i].layerNumber) + 1
+                }
+                list[tmpList[i].id] = tmpList[i] // 加入list
+                res.push(tmpList[i].id)
+            }
+            order.splice(n, 0, ...res)  // 加入order
+            this.setState({ order: order, list: list, tmpList: [] }, () => {
+                return resolve()
+            })
+        })
+    }
+
+    // 刷新每个对象的layerNumber
+    refreshLayerNumber() {
+        // 遍历order 取出每一个对象，判断这是第几层级
+        let order = this.state.order
+        let list = this.state.list
+        // 得到排序后的list
+        for (let i = 0; i < order.length; i++) {
+            for (let j = i - 1; j > 0; j--) {
+                if (list[order[j]].layerNumber < list[order[i]].layerNumber) {
+                    list[order[i]].layerNumber = list[order[j]].layerNumber + 1
+                    break;
+                }
+            }
+        }
+
+        this.setState({ list: JSON.parse(JSON.stringify(list)) }, () => {
+            let data = this.SortOutList()
+            this.setState({ data: data }, () => {
+                if (this.props.onSorted) {
+                    this.props.onSorted(data)
+                }
+            })
+        })
+
+    }
+
+    // 将排序后的数组整理成可折叠的二维数组
+    SortOutList(oo, ll, ii, nn) {
+        let order = oo || this.state.order
+        let list = ll || this.state.list
+        let res = []
+        let initLayerNumber = nn || 1  // 初始化number为1
+        let initIndex = ii || 0  // 初始化进入索引为0
+        for (let i = initIndex; i < order.length; i++) {
+            if (list[order[i]].layerNumber == initLayerNumber) {
+                let o = list[order[i]]
+                // 如果下一级layerNumber大于现在的，证明有children
+                if (o.children) {
+                    delete o.children
+                }
+                if (list[order[i + 1]] && list[order[i + 1]].layerNumber > o.layerNumber) {
+                    o.children = this.SortOutList(order, list, i + 1, initLayerNumber + 1)
+                    console.log(o.layerNumber, list[order[i + 1]].layerNumber)
+                }
+                res.push(o)
+                if (list[order[i + 1]] && list[order[i + 1]].layerNumber < initLayerNumber) {
+                    break
+                }
+            }
+        }
+        return res
+    }
 
     _onRowMoveCancel() {
-        // 停止定时器
-        this.setState({ activeId: 0 }, () => {
-            this.setActiveStatus(0)
-        })
+        this.restoreList(this.state.activeRow.id, 'cancel')
+            .then(() => {
+                // 停止定时器
+                this.setState({ activeId: 0 }, () => {
+                    this.setActiveStatus(0)
+                        .then(() => {
+                            this.refreshLayerNumber()
+                        })
+                })
+            })
+
     }
 
     getActiveIdFromList() {
@@ -213,8 +384,6 @@ class SortableDragList extends Component {
         }
         return 0
     }
-
-
 
     _onRowMoved(e) {
 
@@ -229,75 +398,69 @@ class SortableDragList extends Component {
             return false
         }
 
+
         let order = this.state.order
         let list = this.state.list
         let nowActiveFolderId = parseInt(this.getActiveIdFromList())
 
+        // 如果存在选中项，获取选中项id，在order 中把当前row的id放到选中项后面
+        let nowActiveFolder = list[nowActiveFolderId]
+        let nowActiveRow = list[this.state.activeRow.id]
+
+        this.tt = 'cancel'
+
+        // 存在拖入文件夹的操作
         if (nowActiveFolderId > 0) {
-            // 如果存在选中项，获取选中项id，在order 中把当前row的id放到选中项后面，并且layerNumber是选中项layerNumber+1
-            let nowActiveFolder = list[nowActiveFolderId]
-            let nowActiveRow = list[e.row.data.id]
-            nowActiveRow.layerNumber = nowActiveFolder.layerNumber + 1  // layerNumber +1
-            list[e.row.data.id] = nowActiveRow
+
             // 获取nowActiveFolder 的索引
             let nowActiveFolderIndex = getNowActiveFolderIndex(nowActiveFolderId)
-            console.log(nowActiveFolderId, nowActiveFolderIndex, order)
             if (nowActiveFolderIndex !== false) {
-                console.log("当前被覆盖的数据id", nowActiveFolderIndex)
-                order.splice(nowActiveFolderIndex, 0, order.splice(e.from, 1)[0])
+
+                // 如果是拖入文件夹操作，layerNumber是拖入文件夹的LyerNumber+1,否则和下一级相等，如果没有下一级，和上一级相等
+                nowActiveRow.layerNumber = nowActiveFolder.layerNumber + 1  // layerNumber +1
+
+
+                let ind = nowActiveFolderIndex
+                if (this.activeBoxStatus === 'down' && this.RowFrom >= this.RowTo) {
+                    ind += 1
+                }
+                if (this.activeBoxStatus === 'up' && this.RowFrom >= this.RowTo) {
+                    ind += 1
+                }
+                order.splice(ind, 0, order.splice(this.RowFrom, 1)[0])
+                this.tt = 'active'
             }
-
-
-
         } else {
 
+            // return
+            if (list[order[this.RowTo + 1]]) {
+                nowActiveRow.layerNumber = list[order[this.RowTo + 1]].layerNumber  // 和下一级相等
+            } else {
+                nowActiveRow.layerNumber = list[order[this.RowTo]].layerNumber  // 和上一级相等
+            }
+
+            // 不拖入文件夹，有两种可能：在同一文件夹下拖动，跨文件夹层级拖动
             // 如果移动到的位置是在和原来同一个文件夹下，则layerNumber不变，否则都变为0
-
-            order.splice(e.to, 0, order.splice(e.from, 1)[0])
+            order.splice(this.RowTo, 0, order.splice(this.RowFrom, 1)[0])
+            // 刷新layerNumber
         }
+        list[this.state.activeRow.id] = nowActiveRow
 
-        console.log(order, this.getActiveIdFromList())
-        this.setState({ order: order, activeId: 0, list: list }, () => {
-            this.setActiveStatus(0)
+
+        this.setState({ order: order, list: list }, () => {
+            this.restoreList(this.state.activeId, this.tt)
+                .then(() => {
+                    this.setState({ activeId: 0 }, () => {
+                        this.setActiveStatus(0)
+                            .then(() => {
+                                this.refreshLayerNumber()
+                            })
+
+                    })
+                })
         })
     }
 
-    // 当结束拖拽排序时调用
-    _onRowMoveEnd(e) {
-        // console.log(111)
-        // 清除定时器
-        // this.setState({ activeId: 0 }, () => {
-        //     this.setActiveStatus(0)
-        // })
-        // console.log("current:", this.getActiveIdFromList())
-        // let activeId = this.state.activeId  // 运动的行得id
-        // this.setState({ activeId: 0 }, () => {
-        //     this.setActiveStatus(0)
-        // })
-        // console.log(this.state.activeBoxId, this.state.activeId)
-        // this.setState({ activeId: 0, activeBoxId: 0 }, () => {
-
-
-        // })
-        // this.clearTimer()
-        // let order = this.state.order
-        // order.splice(e.to, 0, order.splice(e.from, 1)[0])
-
-        // console.log(this.state.activeBoxId, e.row.data.id)
-
-        // if (this.state.activeBoxId == e.row.data.id) {
-        //     let list = this.state.list
-        //     list[e.row.data.id] = e.row.data
-        //     this.setState({ list: list })
-        //     e.row.data.layerNumber += 1
-        // }
-        // // console.log(list)
-        // // console.log(e.row)
-        // // list[e.row.data.id] = e.row
-        // // console.log(list[e.row.data.id])
-        // this.setState({ order: order, activeBoxId: 0 })
-
-    }
 
 
 
@@ -318,14 +481,15 @@ class SortableDragList extends Component {
                     }}
                         data={row}
                     />}
-                    // rowHasChanged={(r1, r2) => r1 !== r2}
-                    onMoveEnd={(row) => { this._onRowMoveEnd(row) }}
-                    onRowMoved={(e) => { this._onRowMoved(e) }}
                     onRowActive={(row) => {
                         this._onRowActive(row)
                     }}
+                    onMoveEnd={(row) => {
+                        this._onRowMoved()
+                    }}
                     activeOpacity={0.8}
                     moveOnPressIn
+                    pageSize={500}
                     onMoveCancel={() => this._onRowMoveCancel()}
                 />
             </View>
