@@ -35,9 +35,22 @@ export class Pigeonhole {
         console.log(rows)
     }
 
+    // 根据id查出这条信息
+    async findOne(id) {
+        let res = await exec(`select * from ${this.tableName} where id=?`, [id])
+        if (res.result.rows.length > 0) {
+            return res.result.rows.item(0)
+        }
+        return null
+    }
 
     updatePid(id, pid, sequence) {
         exec(`update ${this.tableName} set pid=?,sequence=? where id=?`, [pid, sequence, id]).catch((err) => { console.log("更新归档pid失败:", err) })
+    }
+
+    async update(data) {
+        let res = await exec(`update ${this.tableName} set name=?,color=? where id=?`, [data.name, data.color, data.id])
+        return res
     }
 
     // 删除归档和归档关联，却并不删除和归档相关联的数据

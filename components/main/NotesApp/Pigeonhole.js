@@ -46,7 +46,10 @@ class Pigeonhole extends Component {
         let p = new P()
         // 入库
         if (data.id) {  // 存在id  更新
-
+            p.update(data)
+            .then(()=>{
+                this.refreshPigeonholeList()
+            })
         } else {  // 不存在id  插入
             p.insert(data)
                 .then((id) => {
@@ -96,10 +99,27 @@ class Pigeonhole extends Component {
         this.refreshPigeonholeListListener = DeviceEventEmitter.addListener("refresh-pigeonhole-sortable-list", () => {
             this.refreshPigeonholeList()
         })
+
+        this.modifyPigeonholeDataEmitterListener = DeviceEventEmitter.addListener("modify-pigeonhole-data-emmiter", (id) => {
+            // 从数据库中查出这条归档信息，然后赋值给临时数据，并显示Modal
+            let p = new P()
+            p.findOne(id)
+                .then((res) => {
+                    let data = {
+                        id: id,
+                        pid: res.pid,
+                        color: res.color || '#000000',
+                        sequence: res.sequence || 0,
+                        name: res.name
+                    }
+                    this.setState({ tmpPigeonhole: data, showCreatePigeonholeModal: true })
+                })
+        })
     }
 
     componentWillUnmount() {
         this.refreshPigeonholeListListener.remove()
+        this.modifyPigeonholeDataEmitterListener.remove()
     }
 
     changeTmpPigeonholeTitleValue(value) {

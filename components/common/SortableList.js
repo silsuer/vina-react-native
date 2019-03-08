@@ -1,7 +1,7 @@
 // 这是一个可拖动排序的组件，当拖动的菜单折叠的时候，可像文件夹一样，变为二级菜单
 
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity, UIManager, findNodeHandle, Alert,DeviceEventEmitter } from 'react-native'
+import { View, Text, TouchableOpacity, UIManager, findNodeHandle, Alert, DeviceEventEmitter } from 'react-native'
 import { Target } from '../assets/svgs/NotesSvg'
 import { SequenceSvg, DeleteSvg } from '../assets/svgs/Common'
 import { SwipeAction, Toast } from '@ant-design/react-native'
@@ -69,27 +69,31 @@ class RowComponent extends Component {
                     }
                 ]}
             >
-                <View
-                >
-                    <View style={{
-                        backgroundColor: item.active ? '#cccccc99' : '#ffffff',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingLeft: 15 * item.layerNumber,
-                        height: 40,
-                        borderRadius: 5,
-                    }} >
-                        <Target width={10} height={10} color={item.color || '#000'} />
-                        <Text style={{ marginLeft: 7, fontSize: 15 }} >{item.name}</Text>
-                        <View style={{ position: 'absolute', right: 20 }}>
-                            <TouchableOpacity {...this.props.sortHandlers}>
-                                <SequenceSvg color="darkgrey" width={20} height={15} />
-                            </TouchableOpacity>
+                <TouchableOpacity onPress={() => {
+                    DeviceEventEmitter.emit("modify-pigeonhole-data-emmiter", item.id)
+                }}>
+                    <View
+                    >
+                        <View style={{
+                            backgroundColor: item.active ? '#cccccc99' : '#ffffff',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            paddingLeft: 15 * item.layerNumber,
+                            height: 40,
+                            borderRadius: 5,
+                        }} >
+                            <Target width={10} height={10} color={item.color || '#000'} />
+                            <Text style={{ marginLeft: 7, fontSize: 15 }} >{item.name}</Text>
+                            <View style={{ position: 'absolute', right: 20 }}>
+                                <TouchableOpacity {...this.props.sortHandlers}>
+                                    <SequenceSvg color="darkgrey" width={20} height={15} />
+                                </TouchableOpacity>
+                            </View>
                         </View>
+                        {/* 下边框 */}
+                        <View style={{ backgroundColor: "#d4d4d4", height: 0.3, width: 350, marginLeft: 20 }}></View>
                     </View>
-                    {/* 下边框 */}
-                    <View style={{ backgroundColor: "#d4d4d4", height: 0.3, width: 350, marginLeft: 20 }}></View>
-                </View>
+                </TouchableOpacity>
             </SwipeAction>
         )
     }
@@ -522,7 +526,7 @@ class SortableDragList extends Component {
                         this.rowComponentRef[row.id] = ref
                     }}
                         data={row}
-                        onDeleted={()=>{
+                        onDeleted={() => {
                             // 让上层组件重新渲染列表
                             DeviceEventEmitter.emit("refresh-pigeonhole-sortable-list")
                         }}
