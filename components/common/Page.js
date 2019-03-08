@@ -346,7 +346,6 @@ class Page extends Component {
 
         const getBody = () => {
             if (this.props.noScrollView) {
-                console.log("hhh ")
                 return (
                     <Animated.View opacity={this.state.opacity} style={styles.body}>
                         {this.state.currentBody}

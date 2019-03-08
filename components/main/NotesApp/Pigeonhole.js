@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Dimensions, Text, StyleSheet } from 'react-native'
-import { CardContainer, CardHeader, CardBody, CardList, CardListItem } from '../../common/CardContainer'
+import { View, TouchableOpacity, Dimensions, Text, StyleSheet, FlatList } from 'react-native'
+import { CardContainer, CardHeader } from '../../common/CardContainer'
 import { CloseSvg, DetermineSvg, EmptySvg, CreatePigeonholeSvg, TakeSelectedSvg, RightSvg, DownSvg } from '../../assets/svgs/Common'
-import { List, SwipeAction, InputItem, Toast, Provider, Modal } from '@ant-design/react-native'
+import { List, InputItem, Toast, Provider, Modal } from '@ant-design/react-native'
 import Collapsible from 'react-native-collapsible'
 import Page from '../../common/Page'
 import { Target } from '../../assets/svgs/NotesSvg'
@@ -17,7 +17,6 @@ const windowHeight = mainWindow.height
 
 // 归档
 class Pigeonhole extends Component {
-
     static TmpPigeonholeList = []
     constructor(props) {
         super(props)
@@ -35,7 +34,6 @@ class Pigeonhole extends Component {
 
     // 保存输入框中的数据
     saveTmpPigeonhole() {
-
         let data = this.state.tmpPigeonhole
         if (!data.name) {
             Toast.fail("归档名称不能为空")
@@ -110,10 +108,8 @@ class Pigeonhole extends Component {
 
         // 如果传来了id，证明是要选择一行进行归档，将这一行选中
         if (this.props.navigation.getParam('id')) {
-            console.log(id);
             this.setState({ selectedPigeonholeId: id })
         }
-
         let s = this.state.collapsedStatus
         if (s[id] === undefined || s[id] === true) {
             s[id] = false
@@ -123,62 +119,15 @@ class Pigeonhole extends Component {
         this.setState({ collapsedStatus: s })
     }
 
-    _ListItemGetExtra(data) {
-        if (data.children && data.children.length > 0) {
-            if (this.state.collapsedStatus[data.id] === undefined || this.state.collapsedStatus[data.id] === true) {
-                // 闭合状态
-                return (
-                    <RightSvg color="#d4d4d4" width="15" height="15" />
-                )
-            } else {
-                // 开启状态
-                return (
-                    <DownSvg color="#d4d4d4" width="15" height="15" />
-                )
-            }
-        }
-        return (
-            <View></View>
-        )
-    }
-
-    // 递归渲染折叠面板
-    recursionRenderCollapsiblePanel(list, layerNumber) {
-        let n = layerNumber || 0
-        return list.map((data, index) => {
-            return (
-                <View key={index}>
-                    {/* 头部 */}
-                    <List.Item
-                        style={{ backgroundColor: data.id === this.state.selectedPigeonholeId ? '#f4f4f455' : 'white' }}
-                        extra={data.children && data.children.length > 0 ? (this.state.collapsedStatus[data.id] == undefined || this.state.collapsedStatus[data.id] == true ? <RightSvg width="15" height="15" color="#d4d4d4" /> : <DownSvg width="15" height="15" color="#d4d4d4" />) : <View></View>}
-                    >
-                        <TouchableOpacity onPress={this._onPressCollapsedStatusListItem.bind(this, data.id)} >
-                            <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 15 * n }}>
-                                <Target width="10" height="10" color={data.color} />
-                                <Text style={{ marginLeft: 7 }}>{data.name}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </List.Item>
-                    {/* 折叠部分 */}
-                    <Collapsible collapsed={this.state.collapsedStatus[data.id]}>
-                        {data.children ? this.recursionRenderCollapsiblePanel(data.children, n + 1) : null}
-                    </Collapsible>
-                </View>
-            )
-        })
-    }
 
     // 将归档列表转换为sort组件可识别的多维数组
     convertListToObj() {
-        let l = this.state.pigeonholeList
-        this.tmpP = []
-        this.refreshList(this.state.pigeonholeList)
+        let tmpP = this.refreshList(this.state.pigeonholeList)
         let r = {}
         let order = []
-        for (let i = 0; i < this.tmpP.length; i++) {
-            r[this.tmpP[i].id] = this.tmpP[i]
-            order.push(this.tmpP[i].id)
+        for (let i = 0; i < tmpP.length; i++) {
+            r[tmpP[i].id] = tmpP[i]
+            order.push(tmpP[i].id)
         }
         return { list: r, order: order }
     }
@@ -186,20 +135,21 @@ class Pigeonhole extends Component {
     // 传入的数据需要
     refreshList(list, layerNumber) {
         let n = layerNumber || 1
+        let res = []
         for (let i = 0; i < list.length; i++) {
             let d = list[i]
             d.layerNumber = n
 
-            if (!(this.tmpP)) {
-                this.tmpP = []
-            }
-            this.tmpP.push(d)
+            res.push(d)
 
             if (d.children && d.children.length > 0) {
-                this.refreshList(d.children, n + 1)
+                let children = this.refreshList(d.children, n + 1)
+                for (let j = 0; j < children.length; j++) {
+                    res.push(children[j])
+                }
             }
         }
-
+        return res
     }
 
     // 点击确认后保存排序后的数据
@@ -228,9 +178,60 @@ class Pigeonhole extends Component {
 
     // 保存排序后的临时数据
     saveTmpPigeonholeList(data) {
-
         Pigeonhole.TmpPigeonholeList = data
     }
+
+    renderFlatListItem(item, layerNumber) {
+        let n = layerNumber || 1
+        return (
+            <View>
+                <TouchableOpacity onPress={this._onPressCollapsedStatusListItem.bind(this, item.item.id)} >
+                    <View style={{
+                        backgroundColor: item.item.id === this.state.selectedPigeonholeId ? '#f4f4f455' : '#ffffff',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingLeft: 15 * n,
+                        height: 40,
+                        borderRadius: 5,
+                    }} >
+                        <Target width={10} height={10} color={item.item.color || '#000'} />
+                        <Text style={{ marginLeft: 7, fontSize: 15 }} >{item.item.name}</Text>
+                        <View style={{ position: 'absolute', right: 20 }}>
+
+                            {
+                                item.item.children && item.item.children.length > 0 ?
+                                    this.state.collapsedStatus[item.item.id] === undefined || this.state.collapsedStatus[item.item.id] === true ?
+                                        <RightSvg color="darkgrey" width={20} height={15} /> :
+                                        <DownSvg color="darkgrey" width={20} height={15} /> :
+                                    null
+                            }
+                        </View>
+                    </View>
+                </TouchableOpacity>
+                {/* 下边框 */}
+                <View style={{ backgroundColor: "#d4d4d4", height: 0.3, width: 350, marginLeft: 20 }}></View>
+                {/* children 组件 */}
+                {item.item.children && item.item.children.length > 0 ?
+                    <Collapsible collapsed={this.state.collapsedStatus[item.item.id]}>
+                        <View>
+                            <FlatList
+                                data={item.item.children}
+                                renderItem={(item) => {
+                                    return this.renderFlatListItem(item, n + 1)
+                                }}
+                                extraData={this.state}
+                                keyExtractor={(item, index) => {
+                                    return item.id+"indexChild"
+                                }}
+                            />
+                        </View>
+                    </Collapsible>
+                    : <View></View>}
+
+            </View>
+        )
+    }
+
 
     render() {
 
@@ -280,6 +281,7 @@ class Pigeonhole extends Component {
                             let type = this.props.navigation.getParam('type')  // 类型
                             // 添加或修改归档关联
                             let pl = new PigeonholeRelation()
+                            console.log(id, this.state.selectedPigeonholeId, type)
                             pl.updateRelation(id, this.state.selectedPigeonholeId, type)
                                 .then((res) => {
                                     // 更新完成，返回
@@ -310,8 +312,18 @@ class Pigeonhole extends Component {
                             data={this.convertListToObj()} />
                     )
                 } else {
-                    //  根据数据拼接手风琴
-                    return this.recursionRenderCollapsiblePanel(this.state.pigeonholeList, 0)
+                    return (
+                        <FlatList
+                            data={this.state.pigeonholeList}
+                            renderItem={(item) => {
+                                return this.renderFlatListItem(item, 0)
+                            }}
+                            extraData={this.state}
+                            keyExtractor={(item, index) => {
+                                return item.id+"index"
+                            }}
+                        />
+                    )
                 }
 
             } else {
@@ -339,7 +351,7 @@ class Pigeonhole extends Component {
                         title={this.props.navigation.getParam('id') ? '归档' : '归档管理'}
                         extra={getHeaderExtra()}
                     />
-                    <View style={{ height: windowHeight * 0.9, backgroundColor: '#f5f5f5', borderRadius: 5 }}>
+                    <View style={{ height: windowHeight * 0.89, backgroundColor: '#f5f5f5', borderRadius: 5 }}>
                         {getCardBody()}
                     </View>
                 </CardContainer>
