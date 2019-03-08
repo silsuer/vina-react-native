@@ -17,12 +17,15 @@ db.transaction((tx) => {
         repeat text, 
         content_id int not null default 0,
         pid int  not null default 0,
+        is_deleted int not null default 0,
         created_at datetime,
-        updated_at datetime
+        updated_at datetime,
+        deleted_at datetime
     )`)
 }, (err) => {
     console.log("创建任务表出错：", err)
 })
+
 
 // 创建文章表
 db.transaction((tx) => {

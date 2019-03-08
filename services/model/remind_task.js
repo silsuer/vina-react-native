@@ -23,6 +23,8 @@ export class RemindTask {
     static modeShock = 2  // 震动
     static modeNotice = 3 // 通知
 
+    static IS_DELETED = 1 // 标记软删除数据
+
     async create(obj) {
         // 获取带有占位符得插入语句和要插入的数据数组
         // 插入主任务
@@ -128,7 +130,7 @@ export class RemindTask {
                                   left join posts on remind_task.content_id=posts.id  
                                   left join pigeonhole_relation on pigeonhole_relation.relation_id=remind_task.id and pigeonhole_relation.type=1
                                   left join pigeonhole on pigeonhole_relation.pigeonhole_id=pigeonhole.id and pigeonhole_relation.type=1
-                                  where remind_task.id in (` + tmpArr.join(',') + `)`, list).catch((err) => {
+                                  where remind_task.is_deleted=0 and remind_task.id in (` + tmpArr.join(',') + `)`, list).catch((err) => {
                 console.log("查找提醒任务失败:", err)
             })
             for (let i = 0; i < res.result.rows.length; i++) {
@@ -172,7 +174,7 @@ export class RemindTask {
         const mainLogic = async () => {
             //TODO 当写好其他类型的数据表时，这里要union一下
             let res = await exec(`select * from (
-                select rowid,id,created_at,1 AS operation_type from remind_task where remind_task.pid=0
+                select rowid,id,created_at,1 AS operation_type from remind_task where remind_task.pid=0 and remind_task.is_deleted=0
                 union all
                 select rowid,id,created_at,2 AS operation_type from posts
                 ) order by created_at desc limit ${limitNumber} offset ${(pageNumber - 1) * limitNumber}`, []).catch((err) => {
@@ -197,6 +199,7 @@ export class RemindTask {
 
             // 提醒任务的数据
             let r1 = await getTaskArray(remind_task_list)
+            // 笔记数据
             let r2 = await getNotesArray(notes_list)
 
 
@@ -256,7 +259,7 @@ export class RemindTask {
                                        and
                                        start_at < ? `
 
-     
+
         let todayTaskCount = await exec(selectTodayTaskCountSql, [
             'work',
             result.id,
@@ -343,7 +346,8 @@ export class RemindTask {
             }
             if (flag === false) {
                 // 删除这行数据
-                exec(`delete from remind_task where id=?`, [res.subTaskData[i]]).catch((err) => { console.log("移除多余子任务失败：", err) })
+                // exec(`delete from remind_task where id=?`, [res.subTaskData[i]]).catch((err) => { console.log("移除多余子任务失败：", err) })
+                this.softDelete(res.subTaskData[i])
             }
         }
         // 修改/添加子任务
@@ -369,6 +373,15 @@ export class RemindTask {
         })
     }
 
+
+    // 软删除数据
+    softDelete(id) {
+        return exec(`update ${this.tableName} set is_deleted=?,deleted_at=? where id=?`, [
+            RemindTask.IS_DELETED,
+            nowDateTime(),
+            id
+        ])
+    }
 
     save() {
 

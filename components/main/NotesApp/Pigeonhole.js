@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Dimensions, Text, StyleSheet, FlatList } from 'react-native'
+import { View, TouchableOpacity, Dimensions, Text, StyleSheet, FlatList, DeviceEventEmitter } from 'react-native'
 import { CardContainer, CardHeader } from '../../common/CardContainer'
 import { CloseSvg, DetermineSvg, EmptySvg, CreatePigeonholeSvg, TakeSelectedSvg, RightSvg, DownSvg } from '../../assets/svgs/Common'
 import { List, InputItem, Toast, Provider, Modal } from '@ant-design/react-native'
@@ -88,13 +88,18 @@ class Pigeonhole extends Component {
 
     }
 
-
-
     componentDidMount() {
         this.refreshPigeonholeList()
         if (this.props.navigation.getParam('selectedId')) {
             this.setState({ selectedPigeonholeId: this.props.navigation.getParam('selectedId') })
         }
+        this.refreshPigeonholeListListener = DeviceEventEmitter.addListener("refresh-pigeonhole-sortable-list", () => {
+            this.refreshPigeonholeList()
+        })
+    }
+
+    componentWillUnmount() {
+        this.refreshPigeonholeListListener.remove()
     }
 
     changeTmpPigeonholeTitleValue(value) {
@@ -221,7 +226,7 @@ class Pigeonhole extends Component {
                                 }}
                                 extraData={this.state}
                                 keyExtractor={(item, index) => {
-                                    return item.id+"indexChild"
+                                    return item.id + "indexChild"
                                 }}
                             />
                         </View>
@@ -281,7 +286,6 @@ class Pigeonhole extends Component {
                             let type = this.props.navigation.getParam('type')  // 类型
                             // 添加或修改归档关联
                             let pl = new PigeonholeRelation()
-                            console.log(id, this.state.selectedPigeonholeId, type)
                             pl.updateRelation(id, this.state.selectedPigeonholeId, type)
                                 .then((res) => {
                                     // 更新完成，返回
@@ -320,7 +324,7 @@ class Pigeonhole extends Component {
                             }}
                             extraData={this.state}
                             keyExtractor={(item, index) => {
-                                return item.id+"index"
+                                return item.id + "index"
                             }}
                         />
                     )

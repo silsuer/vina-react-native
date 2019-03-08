@@ -55,8 +55,6 @@ class All extends Component {
 
             })
         }
-
-        // return <CardListItem headerExtra={[]} contentExtra={[]} />
     }
 
     renderRemind(data, index) {

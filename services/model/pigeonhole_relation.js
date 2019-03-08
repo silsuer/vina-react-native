@@ -1,6 +1,7 @@
 import { exec } from './base'
 
 export class PigeonholeRelation {
+    static TABLE_NAME = 'pigeonhole_relation'
     constructor() {
         this.tableName = 'pigeonhole_relation'
     }

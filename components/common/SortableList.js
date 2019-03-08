@@ -1,12 +1,12 @@
 // 这是一个可拖动排序的组件，当拖动的菜单折叠的时候，可像文件夹一样，变为二级菜单
 
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity, UIManager, findNodeHandle, LayoutAnimation } from 'react-native'
+import { View, Text, TouchableOpacity, UIManager, findNodeHandle, Alert,DeviceEventEmitter } from 'react-native'
 import { Target } from '../assets/svgs/NotesSvg'
-import { SequenceSvg } from '../assets/svgs/Common'
-
+import { SequenceSvg, DeleteSvg } from '../assets/svgs/Common'
+import { SwipeAction, Toast } from '@ant-design/react-native'
 import SortableListView from 'react-native-sortable-listview'
-
+import { Pigeonhole } from '../../services/model/pigeonhole'
 
 // 传入一个list，将渲染成可排序的列表
 
@@ -15,27 +15,82 @@ class RowComponent extends Component {
     render() {
         let item = this.props.data
         return (
-            <View
+            <SwipeAction
+                right={[
+                    {
+                        text: <DeleteSvg width="20" height="20" />,
+                        onPress: () => {
+                            // 点击删除，弹出删除归档选项：取消 删除归档及该归档下所有项目 仅删除归档
+                            Alert.alert("确认删除?", "该操作不可逆！请谨慎操作!", [
+                                {
+                                    text: '删除归档及该归档下所有项目',
+                                    onPress: () => {
+                                        // 二次确认
+                                        Alert.alert("再次确认?", "确认要删除该归档下的所有项目吗?(包含笔记、提醒、纪念日、账单、倒计时)", [
+                                            {
+                                                text: '取消',
+                                            },
+                                            {
+                                                text: '确认删除',
+                                                onPress: () => {
+                                                    let p = new Pigeonhole()
+                                                    p.deletePigeonholeWithRelation(item.id)
+                                                        .then(() => {
+                                                            // 删除逻辑
+                                                            Toast.success("已删除")
+                                                            this.props.onDeleted && this.props.onDeleted()
+                                                        })
+                                                }
+                                            },
+                                        ])
+                                    }
+                                },
+                                {
+                                    text: '仅删除归档',
+                                    onPress: () => {
+                                        // 删除归档逻辑
+                                        let p = new Pigeonhole()
+                                        // 删除归档关联，却不删除关联数据
+                                        p.deletePigeonholeWithoutRelation(item.id)
+                                            .then(() => {
+                                                Toast.success("已删除")
+                                                this.props.onDeleted && this.props.onDeleted()
+                                            })
+
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                }
+                            ])
+                        },
+                        style: { backgroundColor: 'red' },
+
+                    }
+                ]}
             >
-                <View style={{
-                    backgroundColor: item.active ? '#cccccc99' : '#ffffff',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingLeft: 15 * item.layerNumber,
-                    height: 40,
-                    borderRadius: 5,
-                }} >
-                    <Target width={10} height={10} color={item.color || '#000'} />
-                    <Text style={{ marginLeft: 7, fontSize: 15 }} >{item.name}</Text>
-                    <View style={{ position: 'absolute', right: 20 }}>
-                        <TouchableOpacity {...this.props.sortHandlers}>
-                            <SequenceSvg color="darkgrey" width={20} height={15} />
-                        </TouchableOpacity>
+                <View
+                >
+                    <View style={{
+                        backgroundColor: item.active ? '#cccccc99' : '#ffffff',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingLeft: 15 * item.layerNumber,
+                        height: 40,
+                        borderRadius: 5,
+                    }} >
+                        <Target width={10} height={10} color={item.color || '#000'} />
+                        <Text style={{ marginLeft: 7, fontSize: 15 }} >{item.name}</Text>
+                        <View style={{ position: 'absolute', right: 20 }}>
+                            <TouchableOpacity {...this.props.sortHandlers}>
+                                <SequenceSvg color="darkgrey" width={20} height={15} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
+                    {/* 下边框 */}
+                    <View style={{ backgroundColor: "#d4d4d4", height: 0.3, width: 350, marginLeft: 20 }}></View>
                 </View>
-                {/* 下边框 */}
-                <View style={{ backgroundColor: "#d4d4d4", height: 0.3, width: 350, marginLeft: 20 }}></View>
-            </View>
+            </SwipeAction>
         )
     }
 }
@@ -76,19 +131,7 @@ class SortableDragList extends Component {
         return res
     }
 
-    // 将数组变为对象（已index为key）
-    convertListToObj(data) {
-        let arr = this.refreshList(this.props.data)
-        let r = {}
-        for (let i = 0; i < arr.length; i++) {
-            r[arr[i].id] = arr[i]
-        }
-        this.setState({ list: r, order: Object.keys(r) })
-    }
-
     componentDidMount() {
-
-
         this.setState({ list: this.props.data.list, order: this.props.data.order })
     }
 
@@ -479,6 +522,10 @@ class SortableDragList extends Component {
                         this.rowComponentRef[row.id] = ref
                     }}
                         data={row}
+                        onDeleted={()=>{
+                            // 让上层组件重新渲染列表
+                            DeviceEventEmitter.emit("refresh-pigeonhole-sortable-list")
+                        }}
                     />}
                     onRowActive={(row) => {
                         this._onRowActive(row)
