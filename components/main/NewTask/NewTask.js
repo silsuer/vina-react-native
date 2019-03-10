@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-native'
+import { StyleSheet, View, Text, TouchableOpacity, Dimensions,DeviceEventEmitter } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { Button, List, InputItem, Stepper, DatePicker, Provider, Switch, Modal, Toast, SwipeAction, Picker, TextareaItem } from '@ant-design/react-native'
 import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
@@ -529,8 +529,9 @@ class NewTask extends Component {
                     // 跳转到任务列表页
                     Toast.success("保存成功")
                     // 触发刷新列表事件
-                    // DeviceEventEmitter.emit("refresh-all-notes-list")
-                    this.props.navigation.navigate('Notes', { pageName: 'notes-all', refreshList: true })
+                    DeviceEventEmitter.emit("refresh-all-list")
+                    // this.props.navigation.navigate('Notes', { pageName: 'notes-all', refreshList: true })
+                    this.props.navigation.goBack()
                 }
 
             })

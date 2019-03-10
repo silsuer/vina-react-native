@@ -134,6 +134,8 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-sound')
+    implementation project(':react-native-fs')
     implementation project(':react-native-idle')
     implementation project(':react-native-push-notification')
     implementation project(':react-native-webview-bridge')

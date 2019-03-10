@@ -28,6 +28,7 @@ class Pigeonhole extends Component {
             status: 'common',     // edit 是正在编辑状态 common 是正常选择状态
             collapsedStatus: {},
             selectedPigeonholeId: 0,   // 当前正在选择的归档id，只在给数据归档的时候有用处
+            defaultCollapsedStatus: this.props.navigation.getParam('id') ? false : true // 如果是给数据进行归档，默认打开所有折叠
         }
     }
 
@@ -47,9 +48,9 @@ class Pigeonhole extends Component {
         // 入库
         if (data.id) {  // 存在id  更新
             p.update(data)
-            .then(()=>{
-                this.refreshPigeonholeList()
-            })
+                .then(() => {
+                    this.refreshPigeonholeList()
+                })
         } else {  // 不存在id  插入
             p.insert(data)
                 .then((id) => {
@@ -208,6 +209,7 @@ class Pigeonhole extends Component {
 
     renderFlatListItem(item, layerNumber) {
         let n = layerNumber || 1
+
         return (
             <View>
                 <TouchableOpacity onPress={this._onPressCollapsedStatusListItem.bind(this, item.item.id)} >
@@ -237,7 +239,7 @@ class Pigeonhole extends Component {
                 <View style={{ backgroundColor: "#d4d4d4", height: 0.3, width: 350, marginLeft: 20 }}></View>
                 {/* children 组件 */}
                 {item.item.children && item.item.children.length > 0 ?
-                    <Collapsible collapsed={this.state.collapsedStatus[item.item.id]}>
+                    <Collapsible collapsed={this.state.collapsedStatus[item.item.id] === undefined ? this.state.defaultCollapsedStatus : this.state.collapsedStatus[item.item.id]}>
                         <View>
                             <FlatList
                                 data={item.item.children}

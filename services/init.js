@@ -5,6 +5,11 @@ var SQLite = require('react-native-sqlite-storage')
 var db = SQLite.openDatabase("vina.db", "1.0", "vina database", 200000, () => { console.log("opened database") }, (err) => { console.log("SqlErr:", err) })
 
 
+// db.transaction((tx) => {
+//     tx.executeSql(`drop table remind_task`, [], () => {
+//         console.log("success")
+//     })
+// })
 // 创建任务表
 db.transaction((tx) => {
     tx.executeSql(`create table if not exists remind_task (
@@ -110,7 +115,7 @@ db.transaction((tx) => {
 // })
 
 // 创建归档管理表
-db.transaction((tx)=>{
+db.transaction((tx) => {
     tx.executeSql(`create table if not exists pigeonhole (
         id integer primary key not null,
         name varchar(255) not null default '',
@@ -127,7 +132,7 @@ db.transaction((tx)=>{
 //     })
 // })
 // 创建归档关联表
-db.transaction((tx)=>{
+db.transaction((tx) => {
     tx.executeSql(`create table if not exists pigeonhole_relation(
         id integer primary key not null,
         type int not null default 0,
@@ -224,6 +229,20 @@ PushNotification.configure({
 });
 
 global.pushNotification = PushNotification
+
+// 对于音效的全局设置
+global.musicSetting = {
+    start: false,  // 音效默认关闭
+    insectsAndBirdsPlayer: null,  // 虫鸣鸟叫播放器
+    insectsAndBirdsPlayerVolumn: 0,
+    rainPlayer: null,  // 雨声播放器
+    rainPlayerVolumn: 0,
+    theWavesPlayer: null, // 海浪播放器
+    theWavesPlayerVolumn: 0,
+    thunderPlayer: null,  // 雷声播放器
+    thunderPlayerVolumn: 0,
+}
+
 
 global.log = (str) => {
     console.log(str)

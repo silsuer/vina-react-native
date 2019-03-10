@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import {
   View,
-  ART
+  ART,
+  TouchableOpacity
 } from 'react-native';
 
 export default class TimerCircularProgress extends Component {
@@ -118,7 +119,7 @@ export default class TimerCircularProgress extends Component {
       .arc(0, circleRadius * 2, circleRadius)
       .arc(0, -circleRadius * 2, circleRadius)
       .close();
-    let colors = this.props.status==="work" ? ['#FFA700','#CB3E3E'] : ["#88A1FC", "#7869F1",];
+    let colors = this.props.status === "work" ? ['#FFA700', '#CB3E3E'] : ["#88A1FC", "#7869F1",];
     let linearGradient = new ART.LinearGradient(colors, 0, 20, 90, 280);
 
     return <View style={{ backgroundColor: 'rgba(0,0,0,0.0)' }}>
@@ -135,7 +136,7 @@ export default class TimerCircularProgress extends Component {
           y={this.props.surfaceHeigth / 2 - 30}
           fill="#b1dff8"
           font={`50px "Helvetica Neue", "Helvetica", Arial`}>{this.props.fieldText}</ART.Text>
-       
+
       </ART.Surface>
     </View>
   }
@@ -161,69 +162,6 @@ export default class TimerCircularProgress extends Component {
     )
   }
 
-  // 交流充电动画
-  // artDrawACChargeView() {
-  //   // 左边刻度
-  //   const leftLinePath = new ART.Path();
-  //   var radius = this.props.surfaceWidth / 2;
-  //   for (var i = 0, angle = Math.PI * 0.5, tmp, len; i <= this.state.flashCount; i++) {
-  //     len = 12;
-  //     tmp = radius - 5;
-  //     leftLinePath.moveTo(
-  //       radius + tmp * Math.cos(angle),
-  //       radius + tmp * Math.sin(angle)
-  //     );
-  //     tmp -= len;
-  //     leftLinePath.lineTo(radius + tmp * Math.cos(angle), radius + tmp * Math.sin(angle));
-  //     leftLinePath.close();
-  //     angle += Math.PI / 30;
-  //   }
-
-  //   // 右边刻度
-  //   const rightLinePath = new ART.Path();
-  //   var radius = this.props.surfaceWidth / 2;
-  //   for (var i = 0, angle = Math.PI * 0.5, tmp, len; i <= this.state.flashCount; i++) {
-  //     len = 12;
-  //     tmp = radius - 5;
-  //     rightLinePath.moveTo(
-  //       radius + tmp * Math.cos(angle),
-  //       radius + tmp * Math.sin(angle)
-  //     );
-  //     tmp -= len;
-  //     rightLinePath.lineTo(radius + tmp * Math.cos(angle), radius + tmp * Math.sin(angle));
-  //     rightLinePath.close();
-  //     angle -= Math.PI / 30;
-  //   }
-
-  //   var circleRadius = radius - 30
-  //   const path = new ART.Path()
-  //     .moveTo(radius, radius - circleRadius)
-  //     .arc(0, circleRadius * 2, circleRadius)
-  //     .arc(0, -circleRadius * 2, circleRadius)
-  //     .close();
-  //   let colors = ["white", "#58D3F7",];
-  //   let linearGradient = new ART.LinearGradient(colors, 0, 20, 90, 280);
-
-  //   var scale = radius / 95
-  //   var flashPath = new ART.Path()
-  //   flashPath.moveTo(radius + 6 * scale, radius - 28 * scale)
-  //   flashPath.lineTo(radius + 4 * scale, radius - 4 * scale)
-  //   flashPath.lineTo(radius + 18 * scale, radius - 4 * scale)
-  //   flashPath.lineTo(radius - 6 * scale, radius + 28 * scale)
-  //   flashPath.lineTo(radius - 4 * scale, radius + 3 * scale)
-  //   flashPath.lineTo(radius - 17 * scale, radius + 3 * scale)
-  //   flashPath.close()
-
-  //   return <View style={{ backgroundColor: 'rgba(0,0,0,0.0)' }}>
-  //     <ART.Surface width={this.surfaceWidth} height={this.surfaceHeigth} >
-  //       {this.artDrawBg()}
-  //       <ART.Shape d={leftLinePath} stroke="#FCEE5D" strokeWidth={2} fill={"red"} />
-  //       <ART.Shape d={rightLinePath} stroke="#FCEE5D" strokeWidth={2} fill={'red'} />
-  //       <ART.Shape d={path} fill={linearGradient} />
-  //       <ART.Shape d={flashPath} stroke="#ffffff" strokeWidth={2} fill={'#ffffff'} />
-  //     </ART.Surface>
-  //   </View>
-  // }
 
   artDrawWave() {
     var powerPercent = parseInt(this.props.powerPercent)
@@ -269,7 +207,7 @@ export default class TimerCircularProgress extends Component {
       linePath.arc(-2 * radius, 0, radius)
       linePath.close()
       return (
-        <ART.Shape d={linePath} strokeWidth={0} fill={this.props.status==='work'? 'red' : '#5a47d3'} />
+        <ART.Shape d={linePath} strokeWidth={0} fill={this.props.status === 'work' ? 'red' : '#5a47d3'} />
       )
     } else {
       const linePath = new ART.Path()
@@ -278,7 +216,7 @@ export default class TimerCircularProgress extends Component {
         .arc(0, -radius * 2, radius)
         .close();
       return (
-        <ART.Shape d={linePath} strokeWidth={0} fill={this.props.status==='work' ? 'red': '#5a47d3'} />
+        <ART.Shape d={linePath} strokeWidth={0} fill={this.props.status === 'work' ? 'red' : '#5a47d3'} />
       )
     }
   }
@@ -293,9 +231,14 @@ export default class TimerCircularProgress extends Component {
 
   render() {
     return (
-      <View style={{ width: this.props.surfaceWidth, height: this.props.surfaceHeigth, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.0)', }}>
-        {this.typeView()}
-      </View>
+      <TouchableOpacity onPress={() => {
+          // 发出事件
+          this.props.onPress && this.props.onPress()
+      }}>
+        <View style={{ width: this.props.surfaceWidth, height: this.props.surfaceHeigth, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.0)', }}>
+          {this.typeView()}
+        </View>
+      </TouchableOpacity>
     )
   }
 }

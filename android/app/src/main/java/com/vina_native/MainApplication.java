@@ -3,6 +3,8 @@ package com.vina_native;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.zmxv.RNSound.RNSoundPackage;
+import com.rnfs.RNFSPackage;
 import com.github.wusuopu.RNIdle.RNIdlePackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.github.alinz.reactnativewebviewbridge.WebViewBridgePackage;
@@ -29,6 +31,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNSoundPackage(),
+            new RNFSPackage(),
             new RNIdlePackage(),
             new ReactNativePushNotificationPackage(),
             new WebViewBridgePackage(),

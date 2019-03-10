@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { Dimensions, View, Text, StyleSheet, TouchableOpacity, Alert, TextInput, AppState, DeviceEventEmitter } from 'react-native';
+import { Dimensions, View, Text, StyleSheet, TouchableOpacity, Alert, TextInput, AppState } from 'react-native';
 import { withNavigation } from 'react-navigation'
+import { Provider, Modal, List, Switch, Slider } from '@ant-design/react-native'
 import TimerCircularProgress from '../../main/TimerCircularProgress/TimerCircularProgress'
 import TaskTimerStartSvg from '../../assets/svgs/TaskTimerStartSvg/TaskTimerStartSvg'
 import TaskTimerStopSvg from '../../assets/svgs/TaskTimerStopSvg/TaskTimerStopSvg';
@@ -12,8 +13,8 @@ import { TomatoTimer as T } from '../../../services/model/tomato_timer'
 import { PushNotificationRecord } from '../../../services/model/push_notification_records'
 import Config from '../../../configs/app'
 import { nowDateTime } from '../../../services/model/base';
-import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
 import RNIdle from 'react-native-idle'
+import Music from '../../common/Music'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -34,6 +35,7 @@ class TomatoTimer extends Component {
             showGoBackButton: false,   // 是否显示返回按钮
             headerRight: null,
             showHeaderRight: false,  // 不显示headerRight
+            showMusicModal: false,
         }
     }
 
@@ -469,10 +471,10 @@ class TomatoTimer extends Component {
                 }
             ])
         }
-
-
-
     }
+
+
+
 
     render() {
         let styles = StyleSheet.create({
@@ -485,7 +487,7 @@ class TomatoTimer extends Component {
             },
             header: {
                 marginTop: 20,
-                marginBottom: -40,
+                marginBottom: -20,
                 width: windowWidth,
                 flex: 1,
                 flexDirection: 'row',
@@ -526,6 +528,7 @@ class TomatoTimer extends Component {
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: this.state.taskOptionsJustifyContent,
+                marginTop: 80,
             },
             multiLineInput: {
                 marginTop: 30,
@@ -548,6 +551,7 @@ class TomatoTimer extends Component {
             stopButton: {
                 display: this.state.taskOptionsJustifyContent === 'center' ? 'none' : 'flex',
             },
+          
         })
 
         const mainColor = () => {
@@ -558,59 +562,72 @@ class TomatoTimer extends Component {
             }
         }
 
-        return (
-            <LinearGradient locations={[0.2, 1]} colors={mainColor()} style={styles.container} >
-                <View style={styles.container}>
-                    {/* header部分 */}
-                    <View style={styles.header}>
-                        <View style={styles.headerGoBack}>
-                            <TouchableOpacity onPress={this.goBack.bind(this)}>
-                                <GoBackSvg color="#ffffffAA" width="22" height="22" />
-                            </TouchableOpacity>
-                        </View>
-                        <Text style={styles.headerText}>{this.state.title}</Text>
-                        <View style={styles.headerRight}>
-                            {this.state.showHeaderRight ? this.state.headerRight : null}
-                        </View>
-                    </View>
-                    {/* body部分，计时器详情 */}
-                    <TimerCircularProgress
-                        style={styles.body}
-                        surfaceWidth={280}
-                        surfaceHeigth={280}
-                        powerPercent={this.getTimerPercent(this)}
-                        fieldText={this.getTimerString(this.state.minute, this.state.seconds)}
-                        type="dc"
-                        status={this.state.type}
-                    ></TimerCircularProgress>
-                    {/* options部分 开始/暂停/停止 */}
-                    <View style={styles.bottom} >
-                        {/* 这里存放任务详情 */}
-                        <View style={styles.taskDetail}>
-                            <TextInput
-                                placeholder="便签..."
-                                height={windowHeight * 0.3}
-                                multiline
-                                style={styles.multiLineInput} />
-                        </View>
-                        <View style={styles.taskOptions}>
-                            <TouchableOpacity
-                                style={styles.pauseButton} onPress={this.pauseTask.bind(this)}>
-                                <TaskTimerPauseSvg
-                                    status={this.state.pauseButtonStatus}
-                                    width="70" height="70" />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.startButton} onPress={this.startTask.bind(this)}>
-                                <TaskTimerStartSvg width="70" height="70" />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.stopButton} onPress={this.stopTask.bind(this)}>
-                                <TaskTimerStopSvg width="70" height="70" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </LinearGradient>
 
+        return (
+            <Provider>
+                <LinearGradient locations={[0.2, 1]} colors={mainColor()} style={styles.container} >
+                    <View style={styles.container}>
+                        {/* header部分 */}
+                        <View style={styles.header}>
+                            <View style={styles.headerGoBack}>
+                                <TouchableOpacity onPress={this.goBack.bind(this)}>
+                                    <GoBackSvg color="#ffffffAA" width="22" height="22" />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.headerText}>{this.state.title}</Text>
+                            <View style={styles.headerRight}>
+                                {this.state.showHeaderRight ? this.state.headerRight : null}
+                            </View>
+                        </View>
+                        {/* body部分，计时器详情 */}
+                        <TimerCircularProgress
+                            style={styles.body}
+                            surfaceWidth={280}
+                            surfaceHeigth={280}
+                            powerPercent={this.getTimerPercent(this)}
+                            fieldText={this.getTimerString(this.state.minute, this.state.seconds)}
+                            type="dc"
+                            status={this.state.type}
+                            onPress={() => {
+                                this.setState({ showMusicModal: true })
+                            }}
+                        ></TimerCircularProgress>
+                        {/* options部分 开始/暂停/停止 */}
+                        <View style={styles.bottom} >
+                            {/* 这里存放子任务 */}
+                            <View>
+
+                            </View>
+                            <View style={styles.taskOptions}>
+                                <TouchableOpacity
+                                    style={styles.pauseButton} onPress={this.pauseTask.bind(this)}>
+                                    <TaskTimerPauseSvg
+                                        status={this.state.pauseButtonStatus}
+                                        width="70" height="70" />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.startButton} onPress={this.startTask.bind(this)}>
+                                    <TaskTimerStartSvg width="70" height="70" />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.stopButton} onPress={this.stopTask.bind(this)}>
+                                    <TaskTimerStopSvg width="70" height="70" />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </LinearGradient>
+
+                {/* 音效控制器 Modal */}
+                <Modal
+                    maskClosable
+                    transparent
+                    visible={this.state.showMusicModal}
+                    onClose={() => { this.setState({ showMusicModal: false }) }}
+                >
+                   <View>
+                       <Music />
+                   </View>
+                </Modal>
+            </Provider>
         )
     }
 }

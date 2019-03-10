@@ -1,7 +1,7 @@
 // 便签本主界面的全部便签页面，显示最近消息
 
 import React, { Component } from 'react'
-import { View, Text, DeviceEventEmitter } from 'react-native'
+import { View, Text, DeviceEventEmitter, Alert } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { CardContainer, CardHeader, CardBody, CardList, CardListItem } from '../../common/CardContainer'
 import { RemindTask } from '../../../services/model/remind_task'
@@ -10,6 +10,8 @@ import { TaskIcon } from '../../assets/svgs/NotesSvg'
 import { DeleteSvg, PigeonholeSvg, TaskStartSvg, TagSvg } from '../../assets/svgs/Common'
 import { convertMinuteToHour, convertTimeToManual } from '../../../services/common_func'
 import { Toast } from '@ant-design/react-native';
+
+
 // 所有（任务/日程/便签）界面
 class All extends Component {
 
@@ -23,6 +25,13 @@ class All extends Component {
 
     componentDidMount() {
         this.refreshList()
+        this.refreshAllListListener = DeviceEventEmitter.addListener("refresh-all-list", () => {
+            this.refreshList()
+        })
+    }
+
+    componentWillUnmount() {
+        this.refreshAllListListener.remove()
     }
 
     componentWillReceiveProps() {
@@ -68,7 +77,25 @@ class All extends Component {
                             backgroundColor: 'red',
                             color: 'white',
                         },
-                        onPress: () => console.log("移除")
+                        onPress: () => {
+                            // 弹出提示
+                            Alert.alert("确认删除此任务?", "该操作不可逆，请谨慎操作", [
+                                {
+                                    text: "取消"
+                                },
+                                {
+                                    text: '删除',
+                                    onPress: () => {
+                                        // 删除提醒，将id为data.id的remind_task的is_deleted设置为1，然后从现在的list中删除这一项，index就是索引
+                                        let r = new RemindTask()
+                                        let list = this.state.list
+                                        r.softDelete(data.id)
+                                        list.splice(index, 1)
+                                        this.setState({ list: list })
+                                    }
+                                },
+                            ])
+                        }
                     },
                     {
                         text: <PigeonholeSvg width="19" height="19" />,  // 归档
