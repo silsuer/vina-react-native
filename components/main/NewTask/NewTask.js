@@ -197,7 +197,8 @@ class NewTask extends Component {
                     taskComment: res.comment,
                     subTaskData: res.subTaskData,
                     startDateAt: res.start_date_at ? new Date(res.start_date_at) : null,
-                    endDateAt: res.end_date_at ? new Date(res.end_date_at) : null
+                    endDateAt: res.end_date_at ? new Date(res.end_date_at) : null,
+                    advanceNotify: res.advance_notify,
                 })
             })
         }
@@ -527,9 +528,7 @@ class NewTask extends Component {
                 obj.end_date_at = this.state.endDateAt.format("yyyy-MM-dd")
             }
 
-            if (this.state.advanceNotify) { // 提前通知
-                obj.advance_notify = this.state.advanceNotify
-            }
+            obj.advance_notify = this.state.advanceNotify
 
             let remindType = []
             if (this.state.remindModeBell) { // 响铃

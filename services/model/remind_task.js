@@ -327,7 +327,7 @@ export class RemindTask {
 
         // 开始准备保存
         // 修改主任务
-        let updateSql = `update remind_task set title=?,tomato_number=?,content_id=?,remind_at=?,remind_type=?,repeat=?,updated_at=?,start_date_at=?,end_date_at=? where id=?`
+        let updateSql = `update remind_task set title=?,tomato_number=?,content_id=?,remind_at=?,remind_type=?,repeat=?,updated_at=?,start_date_at=?,end_date_at=?,advance_notify=? where id=?`
 
         let mainRes = await exec(updateSql, [
             obj.title,
@@ -339,6 +339,7 @@ export class RemindTask {
             nowDateTime(),
             obj.start_date_at,
             obj.end_date_at,
+            obj.advance_notify,
             obj.id
         ]).catch((err) => { console.log("修改主任务失败:", err) })
 
