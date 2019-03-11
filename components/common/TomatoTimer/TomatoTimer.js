@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Dimensions, View, Text, StyleSheet, TouchableOpacity, Alert, TextInput, AppState } from 'react-native';
+import { Dimensions, ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, TextInput, AppState } from 'react-native';
 import { withNavigation } from 'react-navigation'
 import { Provider, Modal, List, Switch, Slider } from '@ant-design/react-native'
 import TimerCircularProgress from '../../main/TimerCircularProgress/TimerCircularProgress'
@@ -36,6 +36,7 @@ class TomatoTimer extends Component {
             headerRight: null,
             showHeaderRight: false,  // 不显示headerRight
             showMusicModal: false,
+            remindTaskDetail: null,  // 任务详情
         }
     }
 
@@ -78,7 +79,7 @@ class TomatoTimer extends Component {
                     </View>
                 )
             }
-            this.setState({ title: res.title, headerRight: right, showHeaderRight: true })
+            this.setState({ title: res.title, headerRight: right, showHeaderRight: true, remindTaskDetail: res })
         })
     }
 
@@ -473,6 +474,23 @@ class TomatoTimer extends Component {
         }
     }
 
+    generateSubTaskRender() {
+        // if (this.state.remindTaskDetail && this.state.remindTaskDetail.subTaskData && this.state.remindTaskDetail.subTaskData.length > 0) {
+        //     return this.state.remindTaskDetail.subTaskData.map((data, index) => {
+        //         return (
+        //             <View key={index} style={{ flexDirection: 'row', height: 35, width: windowWidth * 0.5 }}>
+        //                 <View>
+        //                     <Text style={{ fontSize: 16,color:"#f2f3f499" }}>{data.title}</Text>
+        //                 </View>
+        //                 <View style={{ position: 'absolute', right: 20 }}>
+        //                     <Text style={{ fontSize: 16,color:"#f2f3f499" }}>6个</Text>
+        //                 </View>
+        //             </View>
+        //         )
+        //     })
+        // }
+        return null
+    }
 
 
 
@@ -508,7 +526,14 @@ class TomatoTimer extends Component {
                 right: 45,
             },
             body: {
-                flex: 1,
+                flex: 2,
+            },
+            subTasks: {
+                flex: 0.2,
+                paddingLeft: 30,
+                paddingTop: 15,
+                justifyContent: 'center',
+                alignItems: 'flex-start',
             },
             bottom: {
                 flex: 3
@@ -527,8 +552,10 @@ class TomatoTimer extends Component {
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'row',
-                justifyContent: this.state.taskOptionsJustifyContent,
+                // justifyContent: this.state.taskOptionsJustifyContent,
+                alignItems: 'stretch',
                 marginTop: 80,
+                justifyContent: 'space-around'
             },
             multiLineInput: {
                 marginTop: 30,
@@ -544,14 +571,15 @@ class TomatoTimer extends Component {
             },
             pauseButton: {
                 display: this.state.taskOptionsJustifyContent === 'center' ? 'none' : 'flex',
+                marginRight: 50
             },
             startButton: {
                 display: this.state.taskOptionsJustifyContent !== 'center' ? 'none' : 'flex',
             },
             stopButton: {
                 display: this.state.taskOptionsJustifyContent === 'center' ? 'none' : 'flex',
+                marginLeft: 50,
             },
-          
         })
 
         const mainColor = () => {
@@ -595,8 +623,10 @@ class TomatoTimer extends Component {
                         {/* options部分 开始/暂停/停止 */}
                         <View style={styles.bottom} >
                             {/* 这里存放子任务 */}
-                            <View>
-
+                            <View style={styles.subTasks}>
+                                <ScrollView style={{ flex: 1 }} >
+                                    {this.generateSubTaskRender()}
+                                </ScrollView>
                             </View>
                             <View style={styles.taskOptions}>
                                 <TouchableOpacity
@@ -623,9 +653,9 @@ class TomatoTimer extends Component {
                     visible={this.state.showMusicModal}
                     onClose={() => { this.setState({ showMusicModal: false }) }}
                 >
-                   <View>
-                       <Music />
-                   </View>
+                    <View>
+                        <Music />
+                    </View>
                 </Modal>
             </Provider>
         )
