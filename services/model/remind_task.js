@@ -15,6 +15,8 @@ export class RemindTask {
             remind_at: null,
             content_id: 'required',
             pid: null,
+            start_date_at: 'required',
+            end_date_at: 'required',
             created_at: 'required',
             updated_at: 'required'
         }
@@ -71,7 +73,7 @@ export class RemindTask {
             obj.comment.type = Post.typeText  //TODO 暂时写成纯文本
             obj.comment.relation_type = Post.relationTypeRemindTask  // 关联提醒事项
             //TODO 备注应当加一列，来判断是否是其他类型的关联数据
-            exec(`insert into posts (type,content,uid,realation_type,created_at,updated_at) values (?,?,?,?,?)`, [obj.comment.type, obj.comment.content, obj.comment.uid, obj.comment.relationTypeRemindTask, obj.comment.created_at, obj.comment.updated_at])
+            exec(`insert into posts (type,content,uid,relation_type,created_at,updated_at) values (?,?,?,?,?)`, [obj.comment.type, obj.comment.content, obj.comment.uid, obj.comment.relationTypeRemindTask, obj.comment.created_at, obj.comment.updated_at])
                 .then((res) => {
                     obj.content_id = res.result.insertId
                 }).catch((err) => {
@@ -321,7 +323,7 @@ export class RemindTask {
 
         // 开始准备保存
         // 修改主任务
-        let updateSql = `update remind_task set title=?,tomato_number=?,content_id=?,remind_at=?,remind_type=?,repeat=?,updated_at=? where id=?`
+        let updateSql = `update remind_task set title=?,tomato_number=?,content_id=?,remind_at=?,remind_type=?,repeat=?,updated_at=?,start_date_at=?,end_date_at=? where id=?`
         console.log(obj)
 
         let mainRes = await exec(updateSql, [
@@ -332,6 +334,8 @@ export class RemindTask {
             obj.remind_type,
             obj.repeat,
             nowDateTime(),
+            obj.start_date_at,
+            obj.end_date_at,
             obj.id
         ]).catch((err) => { console.log("修改主任务失败:", err) })
 

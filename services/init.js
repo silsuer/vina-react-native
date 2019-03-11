@@ -17,6 +17,8 @@ db.transaction((tx) => {
         uid int not null default 0,  
         title varchar(255) not null default '',
         tomato_number int not null default 0,
+        start_date_at datetime,
+        end_date_at datetime,
         remind_at datetime ,
         remind_type text,
         repeat text, 

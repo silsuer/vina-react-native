@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, TouchableOpacity, Dimensions,DeviceEventEmitter } from 'react-native'
+import { StyleSheet, View, Text, TouchableOpacity, Dimensions, DeviceEventEmitter } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { Button, List, InputItem, Stepper, DatePicker, Provider, Switch, Modal, Toast, SwipeAction, Picker, TextareaItem } from '@ant-design/react-native'
 import TomatoSvg from '../../assets/svgs/TomatoSvg/TomatoSvg'
@@ -61,6 +61,8 @@ class NewTask extends Component {
                 tmpIndex: -1,     // 如果是-1，则是新建子任务，如果 >-1 则是修改子任务，index对应数据索引
             },
             repeatData: [['only']],  // 重复项数据
+            startDateAt: null,  // 开始时间 （默认为）
+            endDateAt: null,   // 截止时间
             subTaskData: [],  // 子任务 id title tomatoNumber
             taskComment: '',  // 备注
             saveButtonDisabled: false   // 保存按钮是否可用，用于点击
@@ -140,6 +142,7 @@ class NewTask extends Component {
             let r = new RemindTask()
             r.findOne(id).then((res) => {
 
+                console.log(res)
                 // 先根据结果判断提醒方式
                 let b = false
                 let n = false
@@ -169,7 +172,9 @@ class NewTask extends Component {
                     remindModeNotice: n,
                     remindModeShock: s,
                     taskComment: res.comment,
-                    subTaskData: res.subTaskData
+                    subTaskData: res.subTaskData,
+                    startDateAt: res.start_date_at ? new Date(res.start_date_at) : null,
+                    endDateAt: res.end_date_at ? new Date(res.end_date_at) : null
                 })
             })
         }
@@ -489,6 +494,14 @@ class NewTask extends Component {
             if (this.state.nowSelectRemindTime) {  // 提醒时间
                 obj.remind_at = this.state.nowSelectRemindTime.toLocaleTimeString('chinese', { hour12: false })
             }
+
+            if (this.state.startDateAt) { // 开始时间
+                obj.start_date_at = this.state.startDateAt.format("yyyy-MM-dd")
+            }
+            if (this.state.endDateAt) { // 结束时间
+                obj.end_date_at = this.state.endDateAt.format("yyyy-MM-dd")
+            }
+
             let remindType = []
             if (this.state.remindModeBell) { // 响铃
                 remindType.push(RemindTask.modeBell)
@@ -543,10 +556,26 @@ class NewTask extends Component {
 
     render() {
 
+        const getStartAtExtra = () => {
+            return (
+                <View>
+                    <Text style={{ fontSize: 15, color: '#00000099' }}>{this.state.startDateAt ? this.state.startDateAt.format("yyyy-MM-dd") : "不限"} </Text>
+                </View>
+            )
+        }
+
+        const getEndAtExtra = () => {
+            return (
+                <View>
+                    <Text style={{ fontSize: 15, color: '#00000099' }}>{this.state.endDateAt ? this.state.endDateAt.format("yyyy-MM-dd") : "不限"} </Text>
+                </View>
+            )
+        }
+
         const getDatePickerExtra = () => {
             return (
                 <View>
-                    <Text style={{ fontSize: 15, color: '#00000099' }}>{this.state.nowSelectRemindTime ? this.state.nowSelectRemindTime.format("h:m") : "无"} </Text>
+                    <Text style={{ fontSize: 15, color: '#00000099' }}>{this.state.nowSelectRemindTime ? this.state.nowSelectRemindTime.format("hh:mm") : "无"} </Text>
                 </View>
             )
         }
@@ -625,6 +654,48 @@ class NewTask extends Component {
                                     onPress={this.clickRemindMode.bind(this)}>
                                     <Text>提醒方式</Text>
                                 </List.Item>
+                            </List>
+
+                            <List renderHeader="日期范围">
+                                <DatePicker
+                                    mode="date"
+                                    minDate={new Date(Date.now())}
+                                    extra={getStartAtExtra()}
+                                    onChange={(date) => {
+                                        // 验证，开始时间不能大于结束时间
+                                        if (this.state.endDateAt && (this.state.endDateAt < date)) {
+                                            Toast.fail("开始日期不能大于结束日期")
+                                            return
+                                        }
+                                        console.log(date)
+                                        this.setState({ startDateAt: date })
+                                    }}
+                                >
+                                    <List.Item
+                                        arrow="horizontal"
+                                    >
+                                        <Text>开始日期</Text>
+                                    </List.Item>
+                                </DatePicker>
+
+                                <DatePicker
+                                    mode="date"
+                                    minDate={new Date(Date.now())}
+                                    extra={getEndAtExtra()}
+                                    onChange={(date) => {
+                                        if (this.state.startDateAt && (this.state.startDateAt > date)) {
+                                            Toast.fail("结束日期不能小于开始日期")
+                                            return
+                                        }
+                                        this.setState({ endDateAt: date })
+                                    }}
+                                >
+                                    <List.Item
+                                        arrow="horizontal"
+                                    >
+                                        <Text>结束日期</Text>
+                                    </List.Item>
+                                </DatePicker>
                             </List>
 
                             <List renderHeader="重复">
