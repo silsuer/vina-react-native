@@ -1,6 +1,7 @@
 import { nowDateTime, exec, getTodayDateTime, getTomorrowDateTime } from './base'
 import { Post } from './posts'
 import { TomatoTimer } from './tomato_timer'
+import { PushNotificationRecord } from './push_notification_records';
 
 // 任务模型，创建存储
 export class RemindTask {
@@ -18,7 +19,8 @@ export class RemindTask {
             start_date_at: 'required',
             end_date_at: 'required',
             created_at: 'required',
-            updated_at: 'required'
+            updated_at: 'required',
+            advance_notify: 'required',
         }
     }
     static modeBell = 1  // 响铃方式
@@ -46,6 +48,8 @@ export class RemindTask {
                 return res.result.insertId
             }).then((insertId) => {
                 // 触发添加任务事件，定时提醒
+                let r = new PushNotificationRecord()
+                r.addRemindTaskLocationNotification(insertId)
                 // 返回成功
                 return insertId
             }).catch((err) => {
@@ -324,7 +328,6 @@ export class RemindTask {
         // 开始准备保存
         // 修改主任务
         let updateSql = `update remind_task set title=?,tomato_number=?,content_id=?,remind_at=?,remind_type=?,repeat=?,updated_at=?,start_date_at=?,end_date_at=? where id=?`
-        console.log(obj)
 
         let mainRes = await exec(updateSql, [
             obj.title,
@@ -338,6 +341,10 @@ export class RemindTask {
             obj.end_date_at,
             obj.id
         ]).catch((err) => { console.log("修改主任务失败:", err) })
+
+        // 重新设置本地通知
+        let r = new PushNotificationRecord()
+        r.addRemindTaskLocationNotification(obj.id)
 
         // 删除多余的子任务
         let flag

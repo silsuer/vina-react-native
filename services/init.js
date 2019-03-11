@@ -23,6 +23,7 @@ db.transaction((tx) => {
         remind_type text,
         repeat text, 
         content_id int not null default 0,
+        advance_notify int not null default 0,
         pid int  not null default 0,
         is_deleted int not null default 0,
         created_at datetime,
@@ -200,7 +201,7 @@ PushNotification.configure({
 
     // (required) Called when a remote or local notification is opened or received
     onNotification: function (notification) {
-        // console.log('NOTIFICATION:', notification);
+        console.log('NOTIFICATION:', notification);
 
         // process the notification
 
@@ -217,6 +218,8 @@ PushNotification.configure({
         badge: true,
         sound: true
     },
+
+
 
     // Should the initial notification be popped automatically
     // default: true

@@ -28,7 +28,7 @@ export const nowDateTime = () => { return new Date().toLocaleString('chinese', {
 
 // 获取今天 2019/03/01 00:00:00
 export const getTodayDateTime = () => {
-   return getDateStr(0)
+    return getDateStr(0)
 }
 
 // 获取明天 2019/03/02 00:00:00
@@ -37,8 +37,10 @@ export const getTomorrowDateTime = () => {
 }
 
 
-export const getDateStr = (AddDayCount) => {
-    var dd = new Date();
+// 第一个参数是第几天 第二个参数是作为参照物的时间
+export const getDateStr = (AddDayCount, nowTime) => {
+    let n = nowTime || Date.now()
+    var dd = new Date(n);
     dd.setDate(dd.getDate() + AddDayCount);//获取AddDayCount天后的日期
     var y = dd.getFullYear();
     var m = dd.getMonth() + 1;//获取当前月份的日期

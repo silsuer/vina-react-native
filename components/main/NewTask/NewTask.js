@@ -54,6 +54,7 @@ class NewTask extends Component {
                 minute: -1,
             },
             nowSelectRemindTime: null,
+            advanceNotify: 0,  // 提前通知，0则不提前
             tmpSubTaskData: {      // 临时保存子任务的对象
                 id: 0,
                 title: '',
@@ -73,12 +74,35 @@ class NewTask extends Component {
             let arr = [];
             for (let i = 1; i <= 31; i++) {
                 arr.push({
-                    value: 'day' + i,
+                    value: 'day-' + i,
                     label: '每月' + i + '号',
                 })
             }
             return arr
         }
+
+        this.advanceNotify = [
+            {
+                value: '0',
+                label: '关闭'
+            },
+            {
+                value: '15',
+                label: '15分钟'
+            },
+            {
+                value: '30',
+                label: '30分钟'
+            },
+            {
+                value: '60',
+                label: '1小时'
+            },
+            {
+                value: '120',
+                label: '2小时'
+            },
+        ]
 
         // 重复列表中的操作项
         this.repeatListOptions = [
@@ -95,31 +119,31 @@ class NewTask extends Component {
                 label: '精确到周',
                 children: [
                     {
-                        value: 'monday',
+                        value: '1',
                         label: '每周一'
                     },
                     {
-                        value: 'tuesday',
+                        value: '2',
                         label: '每周二',
                     },
                     {
-                        value: 'wednesday',
+                        value: '3',
                         label: '每周三'
                     },
                     {
-                        value: 'thursday',
+                        value: '4',
                         label: '每周四'
                     },
                     {
-                        value: 'friday',
+                        value: '5',
                         label: '每周五'
                     },
                     {
-                        value: 'saturday',
+                        value: '6',
                         label: '每周六'
                     },
                     {
-                        value: 'sunday',
+                        value: '0',
                         label: '每周日'
                     },
                 ]
@@ -142,7 +166,6 @@ class NewTask extends Component {
             let r = new RemindTask()
             r.findOne(id).then((res) => {
 
-                console.log(res)
                 // 先根据结果判断提醒方式
                 let b = false
                 let n = false
@@ -311,6 +334,8 @@ class NewTask extends Component {
             }
             return false
         }
+
+
 
         const getValueFromKey = (option) => {
             let values = []
@@ -502,6 +527,10 @@ class NewTask extends Component {
                 obj.end_date_at = this.state.endDateAt.format("yyyy-MM-dd")
             }
 
+            if (this.state.advanceNotify) { // 提前通知
+                obj.advance_notify = this.state.advanceNotify
+            }
+
             let remindType = []
             if (this.state.remindModeBell) { // 响铃
                 remindType.push(RemindTask.modeBell)
@@ -555,6 +584,17 @@ class NewTask extends Component {
 
 
     render() {
+
+        const getAdvanceNotifyPickerExtra = () => {
+            for (let i = 0; i < this.advanceNotify.length; i++) {
+                if (parseInt(this.advanceNotify[i].value) === this.state.advanceNotify) {
+                    return (
+                        <Text style={{ fontSize: 15, color: '#00000099' }}>{this.advanceNotify[i].label}</Text>
+                    )
+                }
+            }
+            return null
+        }
 
         const getStartAtExtra = () => {
             return (
@@ -654,6 +694,21 @@ class NewTask extends Component {
                                     onPress={this.clickRemindMode.bind(this)}>
                                     <Text>提醒方式</Text>
                                 </List.Item>
+
+                                <Picker
+                                    data={this.advanceNotify}
+                                    itemStyle={{ fontSize: 18 }}
+                                    onOk={(index) => {
+                                        console.log(index[0])
+                                        this.setState({ advanceNotify: parseInt(index[0]) })
+                                    }}
+                                    extra={getAdvanceNotifyPickerExtra()}
+                                >
+                                    <List.Item arrow="horizontal">
+                                        <Text>提前通知</Text>
+                                    </List.Item>
+                                </Picker>
+
                             </List>
 
                             <List renderHeader="日期范围">
@@ -667,7 +722,6 @@ class NewTask extends Component {
                                             Toast.fail("开始日期不能大于结束日期")
                                             return
                                         }
-                                        console.log(date)
                                         this.setState({ startDateAt: date })
                                     }}
                                 >
@@ -731,7 +785,7 @@ class NewTask extends Component {
                         <List renderHeader="提醒方式">
                             <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'bell')} checked={this.state.remindModeBell} />}>响铃</List.Item>
                             <List.Item extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'shock')} checked={this.state.remindModeShock} />}>震动</List.Item>
-                            <List.Item style={{ marginBottom: 10 }} extra={<Switch onChange={this.changeRemindModeStatus.bind(this, 'notice')} checked={this.state.remindModeNotice} />}>通知</List.Item>
+                            <List.Item style={{ marginBottom: 10 }} extra={<Switch disabled onChange={this.changeRemindModeStatus.bind(this, 'notice')} checked={this.state.remindModeNotice} />}>通知(必选)</List.Item>
                         </List>
                     </Modal>
 
