@@ -1,6 +1,6 @@
 // 应用初始化
 // 建表
-
+import { exec } from './model/base'
 var SQLite = require('react-native-sqlite-storage')
 var db = SQLite.openDatabase("vina.db", "1.0", "vina database", 200000, () => { console.log("opened database") }, (err) => { console.log("SqlErr:", err) })
 
@@ -144,6 +144,18 @@ db.transaction((tx) => {
     )`)
 })
 
+// 创建账单表
+db.transaction((tx) => {
+    tx.executeSql(`create table if not exists accounts(
+        id integer primary key not null,
+        amount decimal(9,2) not null default 0,
+        comment text,
+        category_id int not null default 0,
+        created_at datetime not null default 0
+    )`)
+})
+
+
 
 // db.transaction((tx) => {
 //     tx.executeSql(`drop table bill_categories`, [], () => {
@@ -151,12 +163,85 @@ db.transaction((tx) => {
 //     })
 // })
 // 创建账单分类表
-db.transaction((tx)=>{
+db.transaction((tx) => {
     tx.executeSql(`create table if not exists bill_categories(
         id integer primary key not null,
         name varchar(200) not null default '',
-        icon varchar(200) not null default ''
-    )`)
+        icon varchar(200) not null default '',
+        type int not null default 0
+    )`, [], async (tx, res) => {
+            // 插入数据
+            let data = [
+                {
+                    name: '交通',
+                    icon: 'TrafficSvg',
+                }, {
+                    name: '日常',
+                    icon: 'DailySvg',
+                }, {
+                    name: '餐饮',
+                    icon: 'FoodSvg',
+                }, {
+                    name: '零食',
+                    icon: 'SnacksSvg',
+                }, {
+                    name: '购物',
+                    icon: 'ShoppingSvg'
+                }, {
+                    name: '衣物',
+                    icon: 'ClothingSvg',
+                }, {
+                    name: '数码',
+                    icon: 'DigitalSvg',
+                }, {
+                    name: '书籍',
+                    icon: 'BookSvg',
+                }, {
+                    name: '礼物',
+                    icon: 'GiftSvg',
+                }, {
+                    name: '支付',
+                    icon: 'DefraySvg'
+                }, {
+                    name: '租金',
+                    icon: 'RentSvg',
+                }, {
+                    name: '游戏',
+                    icon: 'GameSvg'
+                }, {
+                    name: '旅游',
+                    icon: 'TravelSvg'
+                }, {
+                    name: '医疗',
+                    icon: 'Medical',
+                }, {
+                    name: '教育',
+                    icon: 'TeachSvg',
+                }, {
+                    name: '咖啡',
+                    icon: 'CoffeeSvg',
+                }, {
+                    name: '家具',
+                    icon: 'FurnitureSvg',
+                }, {
+                    name: '母婴',
+                    icon: 'MaternalAndChildSvg',
+                }, {
+                    name: '工资',
+                    icon: 'WageSvg',
+                }
+            ]
+
+            for (let i = 0; i < data.length; i++) {
+                let res = await exec(`select * from bill_categories where name=? and icon=?`, [data[i].name, data[i].icon])
+                if (res.result.rows.length > 0) {
+                    continue
+                } else {
+                    // 插入
+                    await exec(`insert into bill_categories (name,icon) values (?,?)`, [data[i].name, data[i].icon])
+                }
+            }
+        })
 })
 
 

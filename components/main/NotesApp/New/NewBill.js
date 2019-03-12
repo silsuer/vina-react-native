@@ -1,12 +1,13 @@
 
 import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Dimensions, FlatList } from 'react-native'
-import { Provider, List, TextareaItem, Toast } from '@ant-design/react-native'
+import { Provider, List, TextareaItem, Toast, Modal } from '@ant-design/react-native'
 import Page from '../../../common/Page'
 import { CardContainer, CardBody, CardHeader, CardList, CardListItem, CardBottom } from '../../../common/CardContainer'
-import { CloseSvg, DetermineSvg, RightSvg, CircleSaveSvg } from '../../../assets/svgs/Common'
+import { CloseSvg, DetermineSvg, RightSvg, CircleSaveSvg, CreatePigeonholeSvg } from '../../../assets/svgs/Common'
 import { IncomeSvg, PaySvg } from '../../../assets/svgs/BillSvg'
 import Keyboard from 'react-native-keyboard'
+import { BillCategories } from '../../../../services/model/bill_categories'
 
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
@@ -20,28 +21,112 @@ export default class NewBill extends Component {
             type: 'pay',  // pay是支出 income是收入
             inputFocus: true,  // 如果input获得了焦点，则显示数字键盘（只有当备注获取焦点的时候，才会隐藏数字键盘）
             keys: [],       // 键入的数据
-            categories: ['j', 'jj']  // 分类列表
+            categories: [{ type: 'add' }],  // 分类列表，默认是一个添加按钮
+            category: 0,  // 这个账单所属分类id
         }
     }
 
 
-    // 渲染分类列表
-    renderCategories() {
-        let list = this.state.categories
-        list.push({ // 添加分类
-            type: 'add'
-        })
-
-        return list.map((data, index) => {
-            // 获取图标
-            // 分类表：id name 分类名 icon 分类对应的图标
-            return (
-                <View key={index}>
-                    <Text>{data.name}</Text>
-                </View>
-            )
-        })
+    // 保存账单
+    _saveAccount() {
+       Alert.alert("emm")
     }
+
+    _addCategory(v) {
+        // 添加数据
+        let a = new BillCategories()
+        a.create(v)
+            .then((id) => {
+                this.refreshCategories()
+            })
+    }
+
+    componentDidMount() {
+        this.refreshCategories()
+    }
+
+    refreshCategories() {
+        // 重新获取分类列表
+        let b = new BillCategories()
+        b.findAll()
+            .then((res) => {
+                res.push({ type: 'add' })
+                this.setState({ categories: res })
+            })
+    }
+
+    // 渲染分类列表
+    renderCategories(data) {
+        // 获取图标
+        // 分类表：id name 分类名 icon 分类对应的图标
+        // 如果是添加按钮，则特别处理一下
+        if (data.item.type && data.item.type === 'add') {
+
+            return (
+                <TouchableOpacity onPress={() => {
+                    // 出现添加模态框
+                    Modal.prompt("添加分类", "添加自定义分类", [
+                        {
+                            text: '取消',
+                        },
+                        {
+                            text: '添加',
+                            onPress: v => this._addCategory(v)
+                        }
+                    ])
+                }}>
+                    <View style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: 60,
+                    }}>
+                        <View style={{
+                            padding: 10, borderRightWidth: 1,
+                            borderRightColor: 'rgba(200,200,200,0.5)',
+                        }}>
+                            <CreatePigeonholeSvg color="#d4d4d4" width="23" height="23" />
+                            <Text style={{ fontSize: 13, marginTop: 5 }}>添加</Text>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            )
+        }
+
+        let icon = null
+        if (data.item.icon) {
+            let Comp = require('../../../assets/svgs/BillSvg')[data.item.icon]
+            if (Comp) {
+                icon = <Comp color="#d4d4d4" width="23" height="23" />
+            }
+        }
+
+        return (
+            <TouchableOpacity activeOpacity={0.9} onPress={() => {
+                this.setState({ category: data.item.id })
+            }}>
+                <View style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    margin: 0,
+                    height: 60,
+                    backgroundColor: this.state.category === data.item.id ? '#d4d4d455' : '#ffffff',
+                }}>
+                    <View style={{
+                        padding: 10, borderRightWidth: 1,
+                        borderRightColor: 'rgba(200,200,200,0.5)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                        {icon}
+                        <Text style={{ fontSize: 13, marginTop: 5 }}>{data.item.name}</Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        )
+
+    }
+
+
 
     render() {
 
@@ -109,7 +194,7 @@ export default class NewBill extends Component {
                                 <CloseSvg color="#1e294199" width="17" height="17" />
                             </TouchableOpacity>}
                             title={this.props.navigation.getParam('id') ? getTitle() : '新建' + getTitle()}
-                            extra={[<TouchableOpacity >
+                            extra={[<TouchableOpacity onPress={this._saveAccount.bind(this)}>
                                 <DetermineSvg color="#1e294199" width="17" height="17" />
                             </TouchableOpacity>]}
                         />
@@ -138,14 +223,7 @@ export default class NewBill extends Component {
                                 </View>
                                 <View >
                                     <List>
-                                        <View style={{ height: 60, justifyContent: 'center', paddingLeft: 20 }}>
-                                            <TouchableOpacity onPress={() => Alert.alert("123")}>
-                                                <Text style={{ fontSize: 17 }}>分类</Text>
-                                                <View style={{ position: 'absolute', right: 10 }}>
-                                                    <RightSvg color="#d4d4d4" width="16" height="16" />
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
+
                                         {/* 分类列表，一个横向的FlatList */}
                                         <View>
                                             <FlatList
@@ -153,6 +231,7 @@ export default class NewBill extends Component {
                                                 data={this.state.categories}
                                                 renderItem={this.renderCategories.bind(this)}
                                                 extraData={this.state}
+                                                keyExtractor={(item, index) => index + ''}
                                             />
                                         </View>
                                         <View style={{ width: windowWidth * 0.8, backgroundColor: '#d4d4d4dd', height: 0.4 }}></View>
@@ -164,27 +243,29 @@ export default class NewBill extends Component {
                                                 onBlur={() => {
                                                     this.setState({ inputFocus: true })
                                                 }}
-                                                last style={{ fontSize: 15 }} autoHeight placeholder="备注"></TextareaItem>
+                                                last style={{ fontSize: 15 }} rows={9} placeholder="备注"></TextareaItem>
                                         </View>
                                     </List>
                                 </View>
                             </CardList>
                         </CardBody>
                         <CardBottom color="#f2f3f5" >
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                margin: 12,
-                            }}>
-                                <CircleSaveSvg color="#007bff" width="17" height="17" />
-                                <Text style={{
-                                    color: "#007bff",
-                                    fontSize: 14,
-                                    marginLeft: 5,
-                                    fontWeight: 'bold',
-                                }}>保存</Text>
-                            </View>
+                            <TouchableOpacity onPress={this._saveAccount.bind(this)}>
+                                <View style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    margin: 12,
+                                }}>
+                                    <CircleSaveSvg color="#007bff" width="17" height="17" />
+                                    <Text style={{
+                                        color: "#007bff",
+                                        fontSize: 14,
+                                        marginLeft: 5,
+                                        fontWeight: 'bold',
+                                    }}>保存</Text>
+                                </View>
+                            </TouchableOpacity>
                         </CardBottom>
                     </CardContainer>
 
