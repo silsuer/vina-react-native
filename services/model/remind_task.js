@@ -395,8 +395,9 @@ export class RemindTask {
         ])
     }
 
-    save() {
-
+    // 将传入的id代表的任务标记为已完成，这个只在最近列表中会出现
+    setTaskToFinished(id) {
+        return true
     }
 }
 

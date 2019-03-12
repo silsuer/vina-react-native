@@ -9,13 +9,14 @@
 
 import React from 'react';
 import { createStackNavigator, createAppContainer, createDrawerNavigator } from 'react-navigation'
-import NewTask from './components/main/NewTask/NewTask'
-import { NotesSvg } from './components/assets/svgs/NotesSvg';
-import NotesMainApp from './components/main/NotesMainApp';
-import NewNote from './components/main/NotesApp/New/NewNote'
-import TomatoTimer from './components/common/TomatoTimer/TomatoTimer'
+import NewTask from './components/main/NewTask/NewTask'    // 新建提醒任务
+import { NotesSvg } from './components/assets/svgs/NotesSvg'  // 笔记svg
+import NotesMainApp from './components/main/NotesMainApp'  // 笔记本界面
+import NewNote from './components/main/NotesApp/New/NewNote'  // 新建笔记
+import TomatoTimer from './components/common/TomatoTimer/TomatoTimer' // 番茄钟
 import DrawerContentComponent from './components/common/Drawer'  // 侧边栏
-import Pigeonhole from './components/main/NotesApp/Pigeonhole'
+import Pigeonhole from './components/main/NotesApp/Pigeonhole'  // 归档
+import NewBill from './components/main/NotesApp/New/NewBill'  // 新建账单
 
 import './services/init'
 
@@ -115,6 +116,13 @@ const AppStackNavigator = createStackNavigator({
   },
   pigeonhole: {
     screen: Pigeonhole,
+    navigationOptions: {
+      header: null,
+      gesturesEnabled: false
+    }
+  },
+  newBill: {
+    screen: NewBill,
     navigationOptions: {
       header: null,
       gesturesEnabled: false

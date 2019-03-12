@@ -89,6 +89,21 @@ export class CardBody extends Component {
     }
 }
 
+export class CardBottom extends Component {
+    render() {
+        return (
+            <View style={{
+                borderBottomLeftRadius: 5,
+                borderBottomRightRadius: 5,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: this.props.color || "#ffffff",
+            }}>
+                {this.props.children}
+            </View>
+        )
+    }
+}
 
 export class CardList extends Component {
     render() {

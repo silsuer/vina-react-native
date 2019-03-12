@@ -144,6 +144,22 @@ db.transaction((tx) => {
     )`)
 })
 
+
+// db.transaction((tx) => {
+//     tx.executeSql(`drop table bill_categories`, [], () => {
+//         console.log("success")
+//     })
+// })
+// 创建账单分类表
+db.transaction((tx)=>{
+    tx.executeSql(`create table if not exists bill_categories(
+        id integer primary key not null,
+        name varchar(200) not null default '',
+        icon varchar(200) not null default ''
+    )`)
+})
+
+
 Date.prototype.format = function (fmt) {
     var o = {
         "M+": this.getMonth() + 1,                 //月份 

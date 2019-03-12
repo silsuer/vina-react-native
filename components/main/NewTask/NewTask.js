@@ -698,7 +698,6 @@ class NewTask extends Component {
                                     data={this.advanceNotify}
                                     itemStyle={{ fontSize: 18 }}
                                     onOk={(index) => {
-                                        console.log(index[0])
                                         this.setState({ advanceNotify: parseInt(index[0]) })
                                     }}
                                     extra={getAdvanceNotifyPickerExtra()}

@@ -133,7 +133,21 @@ class All extends Component {
                             backgroundColor: '#28a745',
                             color: 'white',
                         },
-                        onPress: () => console.log("标记为已完成")
+                        onPress: () => {
+                            // 标记为已完成
+                            Alert.alert("确认标记", "确认在今日时间轴上标记该任务为已完成?", [
+                                {
+                                    text: '取消'
+                                },
+                                {
+                                    text: '确认',
+                                    onPress: () => {
+                                        let r = new RemindTask()
+                                        r.setTaskToFinished(data.id)
+                                    }
+                                }
+                            ])
+                        }
                     }
                 ]}
                 title={data.title}
