@@ -1,7 +1,7 @@
 // 便签本主界面的全部便签页面，显示最近消息
 
 import React, { Component } from 'react'
-import { View, Text, DeviceEventEmitter, Alert } from 'react-native'
+import { View, Text, DeviceEventEmitter, Alert, FlatList } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { CardContainer, CardHeader, CardBody, CardList, CardListItem } from '../../common/CardContainer'
 import { RemindTask } from '../../../services/model/remind_task'
@@ -50,25 +50,6 @@ class All extends Component {
         rt.getUnionAll(page, limit).then((res) => {
             this.setState({ list: res })
         })
-    }
-
-    // 渲染列表
-    generateListRender() {
-        if (this.state.list && this.state.list.length > 0) {
-            return this.state.list.map((data, index) => {
-                // 获取数据的归档颜色
-                switch (data.operation_type) {
-                    case 'remind':
-                        return this.renderRemind(data, index)
-                    case 'post':
-                        break
-                    case 'accounts':// 渲染账单
-                        return this.renderAccounts(data, index)
-
-                }
-
-            })
-        }
     }
 
     // 渲染账单
@@ -245,6 +226,21 @@ class All extends Component {
         )
     }
 
+    renderAllListItem(data) {
+
+        switch (data.item.operation_type) {
+            case 'remind':
+                return this.renderRemind(data.item, data.index)
+            case 'post':
+                break
+            case 'accounts':// 渲染账单
+                return this.renderAccounts(data.item, data.index)
+
+        }
+        return null
+
+    }
+
     // 打开提醒详情页
     openRemindDetail(id) {
         this.props.navigation.navigate('newRemindTask', { id: id })
@@ -256,8 +252,13 @@ class All extends Component {
                 <CardContainer>
                     {/* <CardHeader title="全部" extra={[]} /> */}
                     <CardBody>
-                        <CardList>
-                            {this.generateListRender()}
+                        <CardList style={{ borderRadius: 5 }}>
+                            <FlatList
+                                data={this.state.list}
+                                renderItem={this.renderAllListItem.bind(this)}
+                                extraData={this.state}
+                                keyExtractor={(item, index) => index + ''}
+                            />
                         </CardList>
                     </CardBody>
                 </CardContainer>
