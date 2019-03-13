@@ -144,12 +144,21 @@ db.transaction((tx) => {
     )`)
 })
 
+// db.transaction((tx) => {
+//     tx.executeSql(`drop table accounts`, [], () => {
+//         console.log("success")
+//     })
+// })
 // 创建账单表
 db.transaction((tx) => {
     tx.executeSql(`create table if not exists accounts(
         id integer primary key not null,
+        uid int not null default 0,
         amount decimal(9,2) not null default 0,
+        type int not null default 0,
         comment text,
+        is_deleted int not null default 0,
+        deleted_at datetime,
         category_id int not null default 0,
         created_at datetime not null default 0
     )`)

@@ -7,9 +7,10 @@ import { CardContainer, CardHeader, CardBody, CardList, CardListItem } from '../
 import { RemindTask } from '../../../services/model/remind_task'
 import { PigeonholeRelation } from '../../../services/model/pigeonhole_relation'
 import { TaskIcon } from '../../assets/svgs/NotesSvg'
-import { DeleteSvg, PigeonholeSvg, TaskStartSvg, TagSvg } from '../../assets/svgs/Common'
+import { DeleteSvg, PigeonholeSvg, TaskStartSvg, TagSvg, AccountRecordSvg } from '../../assets/svgs/Common'
 import { convertMinuteToHour, convertTimeToManual } from '../../../services/common_func'
 import { Toast } from '@ant-design/react-native';
+import { Accounts } from '../../../services/model/accounts';
 
 
 // 所有（任务/日程/便签）界面
@@ -25,6 +26,7 @@ class All extends Component {
 
     componentDidMount() {
         this.refreshList()
+
         this.refreshAllListListener = DeviceEventEmitter.addListener("refresh-all-list", () => {
             this.refreshList()
         })
@@ -48,7 +50,6 @@ class All extends Component {
         rt.getUnionAll(page, limit).then((res) => {
             this.setState({ list: res })
         })
-
     }
 
     // 渲染列表
@@ -60,10 +61,92 @@ class All extends Component {
                     case 'remind':
                         return this.renderRemind(data, index)
                     case 'post':
+                        break
+                    case 'accounts':// 渲染账单
+                        return this.renderAccounts(data, index)
+
                 }
 
             })
         }
+    }
+
+    // 渲染账单
+    renderAccounts(data, index) {
+
+        const getIcon = (icon, name) => {
+            if (name) {
+                let Comp = require('../../assets/svgs/BillSvg')[icon]
+                if (Comp) {
+                    return [<Comp color="#d4d4d4" width="20" height="20" style={{ marginRight: 20 }} />]
+                }
+                return [<Text>{name}</Text>]
+            }
+            return null
+        }
+
+        return (
+            <CardListItem key={index}
+                swipeLeft={[
+                    {
+                        text: <DeleteSvg />,  // 删除账单
+                        style: {
+                            backgroundColor: 'red',
+                            color: 'white',
+                        },
+                        onPress: () => {
+                            // 弹出提示
+                            Alert.alert("确认删除此账单?", "该操作不可逆，请谨慎操作", [
+                                {
+                                    text: "取消"
+                                },
+                                {
+                                    text: '删除',
+                                    onPress: () => {
+                                        // 删除提醒，将id为data.id的remind_task的is_deleted设置为1，然后从现在的list中删除这一项，index就是索引
+                                        let r = new Accounts()
+                                        let list = this.state.list
+                                        r.softDelete(data.id)
+                                        list.splice(index, 1)
+                                        this.setState({ list: list })
+                                    }
+                                },
+                            ])
+                        }
+                    },
+                    {
+                        text: <PigeonholeSvg width="19" height="19" />,  // 归档
+                        style: {
+                            backgroundColor: '#eab646',
+                            color: 'white',
+                        },
+                        onPress: () => {
+                            this.props.navigation.navigate('pigeonhole', {
+                                id: data.id,
+                                type: PigeonholeRelation.TYPE_ACCOUNT,
+                                selectedId: data.pig_id,
+                                goBackCallback: () => { // 返回时执行的回调
+                                    Toast.success("已归档")
+                                    this.refreshList()
+                                }
+                            })
+                        }
+                    }
+                ]}
+                swipeRight={[]}
+                title={"￥" + data.amount}
+                headerIcon={<AccountRecordSvg color={data.pig_color || "#000000"} width="18" height="18" />}
+                headerExtra={getIcon(data.cateicon, data.catename)}
+                content={data.comment || null}
+                onPress={() => {
+                    this.props.navigation.navigate('newBill', {
+                        id: data.id, callback: () => {
+                            this.refreshList()
+                        }
+                    })
+                }}
+            />
+        )
     }
 
     renderRemind(data, index) {

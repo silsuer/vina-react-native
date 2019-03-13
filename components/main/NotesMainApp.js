@@ -144,7 +144,11 @@ export default class NotesMainApp extends Component {
                         this.props.navigation.navigate('tomatoTimer')
                         break
                     case 'notes-new-account-record':
-                    this.props.navigation.navigate('newBill')
+                        this.props.navigation.navigate('newBill', {
+                            callback: () => {
+                                DeviceEventEmitter.emit("refresh-all-list")
+                            }
+                        })
                         break
                 }
             }

@@ -2,6 +2,7 @@ import { nowDateTime, exec, getTodayDateTime, getTomorrowDateTime } from './base
 import { Post } from './posts'
 import { TomatoTimer } from './tomato_timer'
 import { PushNotificationRecord } from './push_notification_records';
+import { PigeonholeRelation } from './pigeonhole_relation';
 
 // 任务模型，创建存储
 export class RemindTask {
@@ -134,8 +135,8 @@ export class RemindTask {
             }
             let res = await exec(`select remind_task.*,posts.type as post_type,posts.content as comment,pigeonhole.id as pig_id,pigeonhole.color as pig_color from remind_task 
                                   left join posts on remind_task.content_id=posts.id  
-                                  left join pigeonhole_relation on pigeonhole_relation.relation_id=remind_task.id and pigeonhole_relation.type=1
-                                  left join pigeonhole on pigeonhole_relation.pigeonhole_id=pigeonhole.id and pigeonhole_relation.type=1
+                                  left join pigeonhole_relation on pigeonhole_relation.relation_id=remind_task.id and pigeonhole_relation.type=${PigeonholeRelation.TYPE_REMIND_TASK}
+                                  left join pigeonhole on pigeonhole_relation.pigeonhole_id=pigeonhole.id and pigeonhole_relation.type=${PigeonholeRelation.TYPE_REMIND_TASK}
                                   where remind_task.is_deleted=0 and remind_task.id in (` + tmpArr.join(',') + `)`, list).catch((err) => {
                 console.log("查找提醒任务失败:", err)
             })
@@ -166,6 +167,27 @@ export class RemindTask {
             return result
         }
 
+        const getAccountsArray = async (list) => {
+            let result = []
+            let tmpArr = []
+            for (let i = 0; i < list.length; i++) {
+                tmpArr.push('?')
+            }
+            let res = await exec(`select accounts.*,bill_categories.name as catename,bill_categories.icon as cateicon,pigeonhole.id as pig_id,pigeonhole.color as pig_color from accounts 
+            left join bill_categories on bill_categories.id=accounts.category_id
+            left join pigeonhole_relation on pigeonhole_relation.relation_id=accounts.id and pigeonhole_relation.type=${PigeonholeRelation.TYPE_ACCOUNT}
+            left join pigeonhole on pigeonhole_relation.pigeonhole_id=pigeonhole.id and pigeonhole_relation.type=${PigeonholeRelation.TYPE_ACCOUNT}
+            where accounts.is_deleted=0 and accounts.id in (` + tmpArr.join(',') + `)`, list).catch(err => {
+                console.log("查找账单数据失败:", err)
+            })
+            for (let i = 0; i < res.result.rows.length; i++) {
+                let row = res.result.rows.item(i)
+                row.operation_type = 'accounts'
+                result.push(row)
+            }
+            return result
+        }
+
         const searchObj = (list, id) => {
             for (let i = 0; i < list.length; i++) {
                 if (list[i].id === id) {
@@ -183,12 +205,15 @@ export class RemindTask {
                 select rowid,id,created_at,1 AS operation_type from remind_task where remind_task.pid=0 and remind_task.is_deleted=0
                 union all
                 select rowid,id,created_at,2 AS operation_type from posts
+                union all
+                select rowid,id,created_at,3 AS operation_type from accounts where accounts.is_deleted=0
                 ) order by created_at desc limit ${limitNumber} offset ${(pageNumber - 1) * limitNumber}`, []).catch((err) => {
                 console.log("查找联合数据失败:", err)
             })
 
             let remind_task_list = []
             let notes_list = []
+            let accounts_list = []
             let list = []   // 保存每行，当全部查找完成后，根据这里的顺序，重新组装数组
             // 根据里面的数据拆出每个表中的id，然后根据id，分别去对应表中取出全部数据，然后整合到一起
             for (let i = 0; i < res.result.rows.length; i++) {
@@ -199,6 +224,8 @@ export class RemindTask {
                         break
                     case 2:
                         notes_list.push(row.id)
+                    case 3:
+                        accounts_list.push(row.id)
                         break
                 }
             }
@@ -207,7 +234,8 @@ export class RemindTask {
             let r1 = await getTaskArray(remind_task_list)
             // 笔记数据
             let r2 = await getNotesArray(notes_list)
-
+            // 账单数据
+            let r3 = await getAccountsArray(accounts_list)
 
             let result = []
             // 遍历联合数组，将取出的详细数据重新插入
@@ -220,6 +248,9 @@ export class RemindTask {
                         break
                     case 2:  // 去笔记数组中找
                         obj = r2
+                        break
+                    case 3: // 去账单数组中查找
+                        obj = r3
                         break
                 }
                 let s = searchObj(obj, row.id)
@@ -364,7 +395,6 @@ export class RemindTask {
         }
         // 修改/添加子任务
         obj.subTaskData && obj.subTaskData.map((data) => {
-            console.log(data)
             // 判断子任务是否存在,存在则修改，不存在则删除
             if (data.id === 0) { // 新建
                 exec(`insert into remind_task (title,tomato_number,pid,created_at,updated_at) values (?,?,?,?,?)`, [

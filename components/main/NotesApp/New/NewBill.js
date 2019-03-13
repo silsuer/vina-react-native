@@ -8,7 +8,7 @@ import { CloseSvg, DetermineSvg, RightSvg, CircleSaveSvg, CreatePigeonholeSvg } 
 import { IncomeSvg, PaySvg } from '../../../assets/svgs/BillSvg'
 import Keyboard from 'react-native-keyboard'
 import { BillCategories } from '../../../../services/model/bill_categories'
-
+import { Accounts } from '../../../../services/model/accounts'
 const mainWindow = Dimensions.get('window')
 const windowWidth = mainWindow.width
 const windowHeight = mainWindow.height
@@ -18,18 +18,57 @@ export default class NewBill extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            id: 0,   // 大于0，则是修改，为0，则是新建
             type: 'pay',  // pay是支出 income是收入
             inputFocus: true,  // 如果input获得了焦点，则显示数字键盘（只有当备注获取焦点的时候，才会隐藏数字键盘）
             keys: [],       // 键入的数据
             categories: [{ type: 'add' }],  // 分类列表，默认是一个添加按钮
             category: 0,  // 这个账单所属分类id
+            comment: ''
         }
     }
 
 
     // 保存账单
     _saveAccount() {
-       Alert.alert("emm")
+        // amount type comment category_id
+        let obj = {}
+        let amount = parseFloat(this.state.keys.join(''))
+        if (amount == 'NaN') {
+            Toast.fail("数额格式错误，请重新输入")
+            return
+        }
+
+        if (this.state.type === 'pay') {
+            obj.type = Accounts.TYPE_PAY
+            obj.amount = amount * (-1)
+        } else {
+            obj.type = Accounts.TYPE_INCOME
+            obj.amount = amount
+        }
+        obj.comment = this.state.comment || ''
+        obj.category_id = this.state.category || 0
+        obj.id = this.state.id || 0
+        let a = new Accounts()
+        let res = null
+        console.log(this.state.id)
+        if (this.state.id > 0) { // 更新
+            res = a.update(obj)
+        } else {  // 创建
+            res = a.create(obj)
+        }
+        if (res) {
+            res.then((res) => {
+                console.log(res)
+                // 返回上一级，并执行传入的回调函数
+                if (this.props.navigation.getParam('callback')) { // 如果传入了回调，则先执行
+                    let call = this.props.navigation.getParam('callback')
+                    call()
+                }
+                this.props.navigation.goBack()
+            })
+        }
+
     }
 
     _addCategory(v) {
@@ -43,6 +82,35 @@ export default class NewBill extends Component {
 
     componentDidMount() {
         this.refreshCategories()
+        if (this.props.navigation.getParam('id')) {
+            let id = this.props.navigation.getParam('id')
+            // 去数据库中查找详情
+            let r = new Accounts()
+            r.findOne(id)
+                .then((res) => {
+                    if (res) {
+                        console.log(res)
+                        let type = 'income'
+                        let amount = res.amount
+                        if (res.type === Accounts.TYPE_PAY) {
+                            type = 'pay'
+                            amount = amount * (-1)
+                        }
+                        amount = amount + '' // 转为字符串
+                        let keys = []
+                        for (let i = 0; i < amount.length; i++) {
+                            keys.push(amount[i])
+                        }
+                        this.setState({
+                            id: res.id,
+                            type: type,
+                            keys: keys,
+                            category: res.category_id,
+                            comment: res.comment
+                        })
+                    }
+                })
+        }
     }
 
     refreshCategories() {
@@ -243,6 +311,10 @@ export default class NewBill extends Component {
                                                 onBlur={() => {
                                                     this.setState({ inputFocus: true })
                                                 }}
+                                                onChange={(v) => {
+                                                    this.setState({ comment: v })
+                                                }}
+                                                value={this.state.comment}
                                                 last style={{ fontSize: 15 }} rows={9} placeholder="备注"></TextareaItem>
                                         </View>
                                     </List>
