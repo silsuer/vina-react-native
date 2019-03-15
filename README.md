@@ -12,8 +12,8 @@
 
 ## 可能出现的问题
 
- 1. 编译时 `Command CodeSign failed with a nonzero exit code`
- 
+ 1. 编译时 `Command CodeSign failed with a nonzero exit code`：[https://stackoverflow.com/questions/52421999/xcode-10-command-codesign-failed-with-a-nonzero-exit-code](https://stackoverflow.com/questions/52421999/xcode-10-command-codesign-failed-with-a-nonzero-exit-code)
+
 
 ### 依赖有手动修改的部分
 
