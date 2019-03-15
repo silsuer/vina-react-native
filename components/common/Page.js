@@ -60,7 +60,7 @@ class Page extends Component {
     timerCountdown() {
         const currentSave = (timer) => {  // 保存当前状态
             timer.last_action_time = new Date(Date.now())
-            storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
+            storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer }).catch(err => console.log("保存数据失败:", err))
         }
         storage.load({ key: Config.TomatoTimerLocalStorageKey })
             .then((timer) => {
@@ -80,7 +80,7 @@ class Page extends Component {
                         this.setState({ seconds: timer.seconds }, () => { currentSave(timer) })
                     }
                 }
-            })
+            }).catch(err => console.log("目前没有番茄钟历史存在:", err))
     }
     refreshState() {
         storage.load({ key: Config.TomatoTimerLocalStorageKey })
@@ -137,7 +137,7 @@ class Page extends Component {
                     DeviceEventEmitter.emit("change-drawer-colors", 'common')
                     this.setState({ showTitle: false, mode: 'common' })
                 }
-            })
+            }).catch(err => console.log("目前不存在番茄钟历史:", err))
     }
 
     // 判断当前番茄钟是否过期
@@ -155,7 +155,7 @@ class Page extends Component {
                 timer.minute = Math.floor(nowLength / 60) || 0
                 timer.seconds = nowLength - timer.minute * 60 || 0
                 timer.last_action_time = new Date(Date.now())
-                storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
+                storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer }).catch(err => console.log("保存数据失败:", err))
             }
 
             return timer  // 没有过期
@@ -173,14 +173,14 @@ class Page extends Component {
                     storage.save({ key: Config.StartIntervalTagKey, data: Config.StartIntervalTagValue })
                         .then(() => {
                             this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
-                        })
+                        }).catch(err => console.log("保存数据失败:", err))
                 }
             }).catch((err) => {
                 if (err.name === 'NotFoundError') {  // 没找到数据
                     storage.save({ key: Config.StartIntervalTagKey, data: Config.StartIntervalTagValue })
                         .then(() => {
                             this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
-                        })
+                        }).catch(err => console.log("保存数据失败:", err))
                 }
             })
     }
@@ -189,7 +189,7 @@ class Page extends Component {
         storage.save({ key: Config.StartIntervalTagKey, data: null })
             .then(() => {
                 this.taskTimer && clearInterval(this.taskTimer)
-            })
+            }).catch(err => console.log("保存数据失败:", err))
     }
 
     componentDidMount() {

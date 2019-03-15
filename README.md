@@ -10,6 +10,10 @@
 
 4. 重启电脑
 
+## 可能出现的问题
+
+ 1. 编译时 `Command CodeSign failed with a nonzero exit code`
+ 
 
 ### 依赖有手动修改的部分
 
@@ -26,3 +30,13 @@ ListView有点特殊，必须修改datasource才会更新。datasource的修改�
 #### 真机在同一局域网下进行远程调试，控制台出现跨域错误
 
 此时控制台窗口网址应该是 `localhost:8081`，将其改成电脑的内网地址（例如 `192.168.105.69:8081`），让真机与PC同源即可
+
+## 启动
+
+克隆下来
+
+`npm install` 
+
+`react-native link`
+
+然后再编译

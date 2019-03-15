@@ -57,7 +57,7 @@ class TomatoTimer extends Component {
                 timer.minute = Math.floor(nowLength / 60) || 0
                 timer.seconds = nowLength - timer.minute * 60 || 0
                 timer.last_action_time = new Date(Date.now())
-                storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
+                storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer }).catch(err => console.log("保存数据失败:", err))
             }
             return timer  // 没有过期
         }
@@ -93,14 +93,14 @@ class TomatoTimer extends Component {
                     storage.save({ key: Config.StartIntervalTagKey, data: Config.StartIntervalTagValue })
                         .then(() => {
                             this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
-                        })
+                        }).catch(err => console.log("保存数据失败:", err))
                 }
             }).catch((err) => {
                 if (err.name === 'NotFoundError') {  // 没找到数据
                     storage.save({ key: Config.StartIntervalTagKey, data: Config.StartIntervalTagValue })
                         .then(() => {
                             this.taskTimer = setInterval(this.timerCountdown.bind(this), 1000)
-                        })
+                        }).catch(err => console.log("保存数据失败:", err))
                 }
             })
     }
@@ -164,14 +164,14 @@ class TomatoTimer extends Component {
                         this.setCurrentTomatoTimer(navigation.getParam('id'))
                     }
                 }
-            })
+            }).catch(err => console.log("目前不存在番茄钟历史:", err))
     }
 
     clearTimer() {
         storage.save({ key: Config.StartIntervalTagKey, data: null })
             .then(() => {
                 this.taskTimer && clearInterval(this.taskTimer)
-            })
+            }).catch(err => console.log("保存数据失败:", err))
 
     }
 
@@ -257,7 +257,7 @@ class TomatoTimer extends Component {
             }).then((r) => {
                 // 打开倒计时定时器
                 this.startInterval()
-            })
+            }).catch(err => console.log("保存数据失败:", err))
             // 添加一个本地通知，当结束时进行通知
             let p = new PushNotificationRecord()
             p.addTomatoLocationNotification({ taskId: this.props.navigation.getParam('id', 0), tomatoTimerId: insertId, seconds: this.state.seconds, minute: this.state.minute, mode: this.state.type })
@@ -288,15 +288,15 @@ class TomatoTimer extends Component {
                         timer.seconds = 59
                         timer.last_action_time = new Date(Date.now())
                         this.setState({ seconds: 59, minute: timer.minute })
-                        storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
+                        storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer }).catch(err => console.log("保存数据失败:", err))
                     } else {
                         timer.seconds = timer.seconds - 1
                         timer.last_action_time = new Date(Date.now())
                         this.setState({ seconds: timer.seconds })
-                        storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
+                        storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer }).catch(err => console.log("保存数据失败:", err))
                     }
                 }
-            })
+            }).catch(err => console.log("目前没有番茄钟历史存在:", err))
 
     }
 
@@ -342,12 +342,12 @@ class TomatoTimer extends Component {
                 timer.minute = this.state.minute
                 timer.seconds = this.state.seconds
                 timer.last_action_time = new Date(Date.now())
-                storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
+                storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer }).catch(err => console.log("保存数据失败:", err))
 
                 // 取消番茄钟的本地通知，当重新开始的时候再次添加
                 let p = new PushNotificationRecord()
                 p.cancelLocalTomatoNotification(timer.id)
-            })
+            }).catch(err => console.log("目前没有番茄钟历史存在:", err))
             this.clearTimer()
         } else if (this.state.pauseButtonStatus === "start") { // 继续任务逻辑
             storage.load({ key: Config.TomatoTimerLocalStorageKey }).then((timer) => {
@@ -357,7 +357,7 @@ class TomatoTimer extends Component {
                 timer.minute = this.state.minute
                 timer.seconds = this.state.seconds
                 this.setState({ pauseButtonStatus: 'pause', minute: timer.minute, seconds: timer.seconds })
-                storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer })
+                storage.save({ key: Config.TomatoTimerLocalStorageKey, data: timer }).catch(err => console.log("保存数据失败:", err))
                 this.startInterval()
                 // 添加通知
                 let p = new PushNotificationRecord()
@@ -367,7 +367,7 @@ class TomatoTimer extends Component {
                     tomatoTimerId: timer.id,
                     mode: this.state.mode
                 })
-            })
+            }).catch(err => console.log("目前没有番茄钟历史存在:", err))
         }
     }
 
@@ -427,7 +427,7 @@ class TomatoTimer extends Component {
                             }
                         ])
                     })
-            })
+            }).catch(err => console.log("目前没有番茄钟历史存在:", err))
 
 
 
@@ -444,7 +444,7 @@ class TomatoTimer extends Component {
                     let t = new T()
                     t.updateToStopTimer(timer.id, T.STATUS_UNNORMAL_STOP)
                     // 销毁当前kv缓存
-                    storage.save({ key: Config.TomatoTimerLocalStorageKey, data: null })
+                    storage.save({ key: Config.TomatoTimerLocalStorageKey, data: null }).catch(err => console.log("保存数据失败:", err))
                     this.clearTimer() // 清除定时器
                     // 定时器回归原状
                     this.setState({
@@ -454,7 +454,7 @@ class TomatoTimer extends Component {
                         taskOptionsJustifyContent: 'center',
                         type: 'work'  // 不论是否是休息钟，结束后都回归工作钟
                     })
-                })
+                }).catch(err => console.log("目前没有番茄钟历史存在:", err))
         }
 
         if (force === true) {
