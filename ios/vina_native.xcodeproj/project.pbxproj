@@ -61,6 +61,7 @@
 		B027C362221BB1D60052A58C /* libReact-Native-Webview-Bridge.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B027C361221BB1C60052A58C /* libReact-Native-Webview-Bridge.a */; };
 		B027C363221BB1E70052A58C /* libReact-Native-Webview-Bridge.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B027C361221BB1C60052A58C /* libReact-Native-Webview-Bridge.a */; };
 		B068C45D221273C000618BD5 /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B068C44A221270EE00618BD5 /* libART.a */; };
+		B09A6F60223FC0DB00336885 /* dist in Resources */ = {isa = PBXBuildFile; fileRef = B09A6F5F223FC0DB00336885 /* dist */; };
 		B0B48DC722252E290091AFEE /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B0B48DA522252E0E0091AFEE /* libRCTPushNotification.a */; };
 		B0B48DC822252E550091AFEE /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B0B48DA522252E0E0091AFEE /* libRCTPushNotification.a */; };
 		B1E998BC072B41CB82C5F911 /* libRNGestureHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C3B9823D22154865851E4498 /* libRNGestureHandler.a */; };
@@ -530,6 +531,7 @@
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		B027C35C221BB1C60052A58C /* React-Native-Webview-Bridge.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "React-Native-Webview-Bridge.xcodeproj"; path = "../node_modules/react-native-webview-bridge/ios/React-Native-Webview-Bridge.xcodeproj"; sourceTree = "<group>"; };
 		B068C444221270EE00618BD5 /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
+		B09A6F5F223FC0DB00336885 /* dist */ = {isa = PBXFileReference; lastKnownFileType = folder; name = dist; path = "../../marktext/vina-editor/vina-editor/dist"; sourceTree = "<group>"; };
 		B0B48D8F22252E0E0091AFEE /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		B3609BA02A8D48F1824862A9 /* libRNIdle.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNIdle.a; sourceTree = "<group>"; };
 		BD5AF54D1B804146925FE169 /* antoutline.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = antoutline.ttf; path = "../node_modules/@ant-design/icons-react-native/fonts/antoutline.ttf"; sourceTree = "<group>"; };
@@ -962,6 +964,7 @@
 		F51E8CE85FC74395A076C8CB /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B09A6F5F223FC0DB00336885 /* dist */,
 				606D5299A72343508D3E8BF2 /* antfill.ttf */,
 				BD5AF54D1B804146925FE169 /* antoutline.ttf */,
 				C193D2F1BA714635B9B08E49 /* AntDesign.ttf */,
@@ -1618,6 +1621,7 @@
 				00C5B0BAC47748468CF5A335 /* FontAwesome5_Brands.ttf in Resources */,
 				9DFCBE1E7E154D20A1E617B1 /* FontAwesome5_Regular.ttf in Resources */,
 				0200BF9C3241410B8DCE1D25 /* FontAwesome5_Solid.ttf in Resources */,
+				B09A6F60223FC0DB00336885 /* dist in Resources */,
 				D328B36F8455419E8027A84C /* Foundation.ttf in Resources */,
 				5DA6F021C0FA4604B5C80B73 /* Ionicons.ttf in Resources */,
 				D31D5CCC435541C5BDBB3876 /* MaterialCommunityIcons.ttf in Resources */,

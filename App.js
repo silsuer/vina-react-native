@@ -17,7 +17,7 @@ import TomatoTimer from './components/common/TomatoTimer/TomatoTimer' // 番茄�
 import DrawerContentComponent from './components/common/Drawer'  // 侧边栏
 import Pigeonhole from './components/main/NotesApp/Pigeonhole'  // 归档
 import NewBill from './components/main/NotesApp/New/NewBill'  // 新建账单
-
+import Markdown from './components/MarkdownText/MarkdownText'
 import './services/init'
 
 const AppDrawerNavigator = createDrawerNavigator({
@@ -127,10 +127,16 @@ const AppStackNavigator = createStackNavigator({
       header: null,
       gesturesEnabled: false
     }
+  },
+  newMarkdown: {
+    screen: Markdown,
+    navigationOptions: {
+      header: null
+    }
   }
 }, {
-    initialRouteName: 'Drawer',
-    // initialRouteName: 'newRemindTask',
+    // initialRouteName: 'Drawer',
+    initialRouteName: 'newMarkdown',
     mode: 'modal',
   })
 
